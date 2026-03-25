@@ -73,4 +73,3 @@ _Last updated: 2026-03-26_
 ## Open tasks (from `prd_tasks.md`)
 
 - [ ] Set up environment variable loading for LLM API key (`.env` / `python-dotenv`)
-- [ ] Handle empty content after extraction with a distinct user-facing message
