@@ -39,7 +39,7 @@ def _strip_tags(raw_html: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def extract_content(html: str) -> str:
+def extract_text(html: str) -> str:
     """Use readability-lxml to strip boilerplate and return the main article text."""
     doc = Document(html)
     content_html = doc.summary()
@@ -58,7 +58,3 @@ def extract_content(html: str) -> str:
             "The page may not contain enough readable text to summarize."
         )
     return text
-
-
-# Alias for backward compatibility
-extract_text = extract_content
