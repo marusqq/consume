@@ -57,7 +57,10 @@
 - [x] Write unit tests for URL validation logic
   - Created `tests/__init__.py` to make the test directory a package
   - Created `tests/test_url_validation.py` with 11 unit tests covering `_validate_url`:
-- [ ] Write unit tests for `extract_content()` using fixture HTML files (normal page, minimal page)
+- [x] Write unit tests for `extract_content()` using fixture HTML files (normal page, minimal page)
+  - Created `tests/fixtures/normal_page.html` — a realistic article page with HTML entities, navigatio...
+  - Created `tests/fixtures/minimal_page.html` — a bare-bones page with a single paragraph
+  - Created `tests/test_extract_content.py` with 10 tests covering: text extraction from both fixtures, ...
 - [ ] Write unit tests for `summarize()` by mocking the LLM API response
 - [ ] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
 
