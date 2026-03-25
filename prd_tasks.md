@@ -10,7 +10,7 @@
   - [x] Created `pyproject.toml` with dependencies: `requests`, `readability-lxml`, and `anthropic`
   - [x] Created `pyproject.toml` with `requests`, `readability-lxml`, and `anthropic` dependencies (already ...
 - [x] Set up environment variable loading for LLM API key configuration
-  - Added `python-dotenv` to `pyproject.toml` dependencies
+  - [x] Added `python-dotenv` to `pyproject.toml` dependencies
   - Added `load_dotenv()` call in `cli.py` so a `.env` file is loaded at startup before any API calls
   - Created `.env.example` documenting the required `ANTHROPIC_API_KEY` and optional `CONSUME_MODEL` var...
 
