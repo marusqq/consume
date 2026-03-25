@@ -11,7 +11,9 @@
 - [ ] Set up environment variable loading for LLM API key configuration
 
 ## Phase 2: CLI Entry Point
-- [ ] Implement `cli.py` with argument parsing: positional `<url>` arg and optional `--mode short|long` flag
+- [x] Implement `cli.py` with argument parsing: positional `<url>` arg and optional `--mode short|long` flag
+  - Implemented `consume/cli.py` with `argparse`: positional `url` argument and optional `--mode short|l...
+  - Added `parse_args()` for testability and `main()` as the entry point
 - [ ] Implement URL format validation (reject malformed URLs before making any network calls)
 - [ ] Wire up the fetch → extract → summarize → output pipeline in `cli.py`
 - [ ] Implement clean bullet-point terminal output formatter in `cli.py`
