@@ -59,11 +59,11 @@ class TestExtractText:
         assert "<" not in result
 
     def test_empty_html_raises(self):
-        with pytest.raises(ValueError, match="No content"):
+        with pytest.raises(ValueError, match="No readable content"):
             extract_text("<html><body></body></html>")
 
     def test_whitespace_only_body_raises(self):
-        with pytest.raises(ValueError, match="No content"):
+        with pytest.raises(ValueError, match="No readable content"):
             extract_text("<html><body>   \n\t  </body></html>")
 
     def test_returns_string(self):

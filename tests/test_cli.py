@@ -1,8 +1,10 @@
-"""Unit tests for cli.format_bullets."""
+"""Unit tests for cli.format_bullets and cli.main."""
+
+from unittest.mock import patch
 
 import pytest
 
-from consume.cli import format_bullets
+from consume.cli import format_bullets, main
 
 
 class TestFormatBullets:
@@ -58,3 +60,59 @@ class TestFormatBullets:
         result = format_bullets(summary)
         for line in result.splitlines():
             assert not line.endswith(" "), f"Trailing space: {repr(line)}"
+
+
+class TestMainEmptyContent:
+    def test_empty_content_prints_error_to_stderr(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html></html>"),
+            patch(
+                "consume.cli.extract_text",
+                side_effect=ValueError(
+                    "No readable content could be extracted from this page. "
+                    "The page may require JavaScript, be behind a login, or contain only images."
+                ),
+            ),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "No readable content" in captured.err
+
+    def test_too_short_content_prints_error_to_stderr(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html><body>hi</body></html>"),
+            patch(
+                "consume.cli.extract_text",
+                side_effect=ValueError("Extracted content is too short (2 chars, minimum 50)."),
+            ),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "too short" in captured.err
+
+    def test_empty_content_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html></html>"),
+            patch(
+                "consume.cli.extract_text",
+                side_effect=ValueError("No readable content could be extracted from this page."),
+            ),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+
+
+def _run_main(args=None):
+    """Helper to invoke main() with patched sys.argv."""
+    import sys
+
+    with patch.object(sys, "argv", ["consume", "https://example.com"]):
+        main()

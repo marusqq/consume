@@ -48,10 +48,14 @@ def extract_content(html: str) -> str:
         # Fallback: strip all tags from the raw HTML directly
         text = _strip_tags(html)
     if not text:
-        raise ValueError("No content could be extracted from the page.")
+        raise ValueError(
+            "No readable content could be extracted from this page. "
+            "The page may require JavaScript, be behind a login, or contain only images."
+        )
     if len(text) < MIN_CONTENT_LENGTH:
         raise ValueError(
-            f"Extracted content is too short ({len(text)} chars, minimum {MIN_CONTENT_LENGTH})."
+            f"Extracted content is too short ({len(text)} chars, minimum {MIN_CONTENT_LENGTH}). "
+            "The page may not contain enough readable text to summarize."
         )
     return text
 
