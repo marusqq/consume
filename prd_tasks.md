@@ -61,7 +61,12 @@
   - Created `tests/fixtures/normal_page.html` — a realistic article page with HTML entities, navigatio...
   - Created `tests/fixtures/minimal_page.html` — a bare-bones page with a single paragraph
   - Created `tests/test_extract_content.py` with 10 tests covering: text extraction from both fixtures, ...
-- [ ] Write unit tests for `summarize()` by mocking the LLM API response
+- [x] Write unit tests for `summarize()` by mocking the LLM API response
+  - Created `tests/test_summarize.py` with 11 unit tests covering `summarize()` using `unittest.mock.pat...
+  - Added tests for short and long mode returning the API response text
+  - Added tests verifying the correct bullet count is passed in the prompt for each mode
+  - Added a test confirming the default mode is short
+  - Added tests verifying the input text is forwarded to the API
 - [ ] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
 
 ## Phase 8: Documentation
