@@ -35,7 +35,9 @@
 - [ ] Make LLM provider/model configurable via environment variable
 
 ## Phase 5: Error Handling
-- [ ] Handle invalid URL error with a clear user-facing message and non-zero exit code
+- [x] Handle invalid URL error with a clear user-facing message and non-zero exit code
+  - Added `_validate_url()` to `extractor.py` that checks for `http`/`https` scheme and non-empty host, ...
+  - Updated `cli.py` to catch `ValueError` separately and print a clean `Error: ...` message (without th...
 - [ ] Handle network failure (connection error, timeout) with a clear user-facing message
 - [ ] Handle extraction failure (no content parsed) with a clear user-facing message
 - [ ] Handle empty content after extraction with a clear user-facing message
