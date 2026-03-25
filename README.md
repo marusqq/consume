@@ -24,8 +24,9 @@ pip install -e .
 | Variable | Required | Description |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | API key for the Claude LLM used to summarize content. Get one at [console.anthropic.com](https://console.anthropic.com). |
+| `CONSUME_MODEL` | No | Override the default Claude model (e.g. `claude-haiku-4-5-20251001`). |
 
-Copy `.env.example` to `.env` and set your key:
+Copy `.env.example` to `.env` and fill in your values:
 
 ```bash
 cp .env.example .env
