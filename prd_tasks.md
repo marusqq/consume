@@ -13,7 +13,8 @@
 - [x] Set up environment variable loading for LLM API key configuration
   - [x] Added `python-dotenv` to `pyproject.toml` dependencies
   - [x] Added `load_dotenv()` call in `cli.py` so a `.env` file is loaded at startup before any API calls
-  - Created `.env.example` documenting the required `ANTHROPIC_API_KEY` and optional `CONSUME_MODEL` var...
+  - [x] Created `.env.example` documenting the required `ANTHROPIC_API_KEY` and optional `CONSUME_MODEL` var...
+  - Created `.env.example` documenting `ANTHROPIC_API_KEY` (required) and `CONSUME_MODEL` (optional, com...
 
 ## Phase 2: CLI Entry Point
 - [x] Implement `cli.py` with argument parsing: positional `<url>` arg and optional `--mode short|long` flag
