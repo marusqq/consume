@@ -26,10 +26,6 @@ _Last updated: 2026-03-26_
 | `4155f92` | Invalid URL error handling with non-zero exit code |
 | `1dd9fbb` | Full fetch → extract → summarize → output pipeline wired in `cli.py` |
 
-## Uncommitted changes
-
-- `consume/extractor.py` — renamed `extract_text` → `extract_content` (with `extract_text` kept as a backward-compat alias). Not yet committed.
-
 ---
 
 ## What's working (fully implemented & committed)
@@ -43,7 +39,7 @@ _Last updated: 2026-03-26_
 ### Extraction (`consume/extractor.py`)
 - `fetch_html(url)` — HTTP GET with 10s timeout and User-Agent header
 - `_validate_url(url)` — rejects non-http/https or hostless URLs
-- `extract_content(html)` — readability-lxml strips boilerplate; fallback to raw tag-strip if empty
+- `extract_text(html)` — readability-lxml strips boilerplate; fallback to raw tag-strip if empty
 - Content length guard: raises `ValueError` if extracted text < 50 chars
 
 ### Summarization (`consume/summarizer.py`)
@@ -77,5 +73,4 @@ _Last updated: 2026-03-26_
 ## Open tasks (from `prd_tasks.md`)
 
 - [ ] Set up environment variable loading for LLM API key (`.env` / `python-dotenv`)
-- [ ] Implement `extract_content` as a formally named function (done in working tree, not committed)
 - [ ] Handle empty content after extraction with a distinct user-facing message
