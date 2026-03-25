@@ -7,6 +7,7 @@ from readability import Document
 
 TIMEOUT = 10
 USER_AGENT = "consume/1.0 (content reader)"
+MIN_CONTENT_LENGTH = 50
 
 
 def _validate_url(url: str) -> None:
@@ -47,4 +48,8 @@ def extract_text(raw_html: str) -> str:
         text = _strip_tags(raw_html)
     if not text:
         raise ValueError("No content could be extracted from the page.")
+    if len(text) < MIN_CONTENT_LENGTH:
+        raise ValueError(
+            f"Extracted content is too short ({len(text)} chars, minimum {MIN_CONTENT_LENGTH})."
+        )
     return text

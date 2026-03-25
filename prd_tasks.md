@@ -29,7 +29,12 @@
 - [x] Implement fallback extraction for minimal pages (e.g. strip all tags, return raw visible text)
   - Implemented fallback in `extract_text()`: if `readability` returns empty content, strip all tags dir...
   - Added `test_fallback_to_raw_text_when_readability_returns_empty` to cover the fallback path
-- [ ] Add content length check — raise extraction failure if result is below a minimum threshold
+- [x] Add content length check — raise extraction failure if result is below a minimum threshold
+  - Added `MIN_CONTENT_LENGTH = 50` constant to `extractor.py`
+  - Added length check in `extract_text()` that raises `ValueError` with a descriptive message (includin...
+  - Added three new tests: `test_too_short_content_raises`, `test_content_at_minimum_length_does_not_rai...
+  - Updated `minimal_page.html` fixture to contain enough text to pass the new threshold
+  - Updated `test_fallback_to_raw_text_when_readability_returns_empty` to use content long enough to pas...
 
 ## Phase 4: Summarization
 - [ ] Implement `summarizer.py` with `summarize(text, mode)` that calls the configured LLM API
