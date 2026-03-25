@@ -25,6 +25,15 @@ pip install -e .
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | API key for the Claude LLM used to summarize content. Get one at [console.anthropic.com](https://console.anthropic.com). |
 
+Copy `.env.example` to `.env` and set your key:
+
+```bash
+cp .env.example .env
+# then edit .env and replace the placeholder with your real key
+```
+
+Or export it directly in your shell:
+
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
@@ -72,3 +81,13 @@ consume https://example.com/article --mode long
 - Page with no extractable content
 - LLM API authentication failure (`ANTHROPIC_API_KEY` missing or invalid)
 - LLM API rate limit or timeout
+
+## Running Tests
+
+```bash
+# Unit tests only (no network or API key required)
+pytest -m "not integration"
+
+# All tests including integration smoke test (requires network + ANTHROPIC_API_KEY)
+pytest
+```
