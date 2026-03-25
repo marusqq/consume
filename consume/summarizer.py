@@ -2,15 +2,19 @@ import os
 
 import anthropic
 
-SHORT_BULLETS = 3
+SHORT_BULLETS = 5
 LONG_BULLETS = 9
 
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 
 SYSTEM_PROMPT = (
-    "You are a concise summarizer. Output only bullet points, one per line, "
-    "each starting with '•'. No preamble, no commentary, no trailing text. "
-    "Each bullet must be factual, ≤15 words."
+    "You are a factual summarizer. "
+    "Rules you must never break:\n"
+    "1. Output ONLY bullet points — no headings, no preamble, no trailing commentary.\n"
+    "2. Every bullet starts with the '•' character followed by a single space.\n"
+    "3. Each bullet is ≤15 words and states a verifiable fact from the source text.\n"
+    "4. Do not infer, editorialize, or add information not present in the source.\n"
+    "5. Output exactly the number of bullets requested — no more, no fewer."
 )
 
 
