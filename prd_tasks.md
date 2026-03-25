@@ -73,4 +73,5 @@
   - Added `[tool.pytest.ini_options]` with the `integration` marker registration to avoid unknown-mark w...
 
 ## Phase 8: Documentation
-- [ ] Write `README.md` covering: installation, required env vars, usage examples, supported modes
+- [x] Write `README.md` covering: installation, required env vars, usage examples, supported modes
+  - Created `README.md` covering installation steps, the required `ANTHROPIC_API_KEY` env var, CLI usage...
