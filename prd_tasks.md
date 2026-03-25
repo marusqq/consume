@@ -161,7 +161,9 @@
   - Added tests verifying the input text is forwarded to the API
 - [x] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
   - [x] Created `tests/test_integration_smoke.py` with a `@pytest.mark.integration` smoke test that invokes ...
-  - Created `tests/test_integration_smoke.py` with a `@pytest.mark.integration` smoke test
+  - [x] Created `tests/test_integration_smoke.py` with a `@pytest.mark.integration` smoke test
+  - Created `tests/test_integration_smoke.py` with a `@pytest.mark.integration` smoke test that invokes ...
+  - Added skip logic for network/API failures so CI without credentials degrades gracefully
   - [x] Added `[project.scripts]` entry to `pyproject.toml` so `consume` is a proper CLI entry point
   - Added `[tool.pytest.ini_options]` with the `integration` marker registration to avoid unknown-mark w...
 
