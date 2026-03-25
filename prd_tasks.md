@@ -54,7 +54,9 @@
 - [ ] Implement `utils.py` with shared helpers: text truncation (cap input tokens to LLM), whitespace normalization
 
 ## Phase 7: Testing
-- [ ] Write unit tests for URL validation logic
+- [x] Write unit tests for URL validation logic
+  - Created `tests/__init__.py` to make the test directory a package
+  - Created `tests/test_url_validation.py` with 11 unit tests covering `_validate_url`:
 - [ ] Write unit tests for `extract_content()` using fixture HTML files (normal page, minimal page)
 - [ ] Write unit tests for `summarize()` by mocking the LLM API response
 - [ ] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
