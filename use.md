@@ -18,7 +18,7 @@ _Last updated: 2026-03-26_
 | `ee332eb` | `README.md` with installation, env vars, usage examples |
 | `5fec558` | Integration smoke test: run `consume <real_url>`, assert bullet output |
 | `6b5d280` | Unit tests for `summarize()` with mocked LLM responses |
-| `e51f341` | Unit tests for `extract_content()` using fixture HTML files |
+| `e51f341` | Unit tests for `extract_text()` using fixture HTML files |
 | `f066b31` | Unit tests for URL validation logic |
 | `8cfe3a1` | LLM API failure handling (auth error, rate limit, timeout) |
 | `7d2181f` | Extraction failure handling (no content parsed) |
