@@ -16,6 +16,12 @@ dependencies = [
 [project.scripts]
 consume = "consume.cli:main"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "requests-mock",
+]
+
 [tool.pytest.ini_options]
 markers = [
     "integration: marks tests as integration tests that require network and API access (deselect with '-m not integration')",
