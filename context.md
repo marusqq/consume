@@ -1,1 +1,1 @@
-`context.md` updated with current architecture, pipeline flow, all key components, and a summary of recent changes.
+`context.md` updated with current architecture, pipeline details, all components, and recent changes summary.
