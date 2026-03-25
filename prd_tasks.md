@@ -67,7 +67,10 @@
   - Added tests verifying the correct bullet count is passed in the prompt for each mode
   - Added a test confirming the default mode is short
   - Added tests verifying the input text is forwarded to the API
-- [ ] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
+- [x] Write an integration smoke test: run `consume <real_url>` and assert bullet output is returned
+  - Created `tests/test_integration_smoke.py` with a `@pytest.mark.integration` smoke test that invokes ...
+  - Added `[project.scripts]` entry to `pyproject.toml` so `consume` is a proper CLI entry point
+  - Added `[tool.pytest.ini_options]` with the `integration` marker registration to avoid unknown-mark w...
 
 ## Phase 8: Documentation
 - [ ] Write `README.md` covering: installation, required env vars, usage examples, supported modes

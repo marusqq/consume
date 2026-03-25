@@ -11,3 +11,11 @@ dependencies = [
     "readability-lxml",
     "anthropic",
 ]
+
+[project.scripts]
+consume = "consume.cli:main"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests that require network and API access (deselect with '-m not integration')",
+]
