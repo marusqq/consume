@@ -10,6 +10,7 @@ dependencies = [
     "requests",
     "readability-lxml",
     "anthropic",
+    "python-dotenv",
 ]
 
 [project.scripts]

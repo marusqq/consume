@@ -3,6 +3,10 @@ import shutil
 import sys
 import textwrap
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from consume.extractor import extract_text, fetch_html
 from consume.summarizer import summarize
 
