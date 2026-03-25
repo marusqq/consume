@@ -90,6 +90,7 @@
 ## Phase 7: Testing
 - [x] Write unit tests for URL validation logic
   - [x] Created `tests/__init__.py` to make the test directory a package
+  - [x] Created `tests/__init__.py` as an empty file to mark the `tests` directory as a Python package
   - Created `tests/__init__.py` as an empty file to mark the `tests` directory as a Python package
   - Created `tests/test_url_validation.py` with 11 unit tests covering `_validate_url`:
 - [x] Write unit tests for `extract_content()` using fixture HTML files (normal page, minimal page)
