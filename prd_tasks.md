@@ -51,7 +51,8 @@
   - Updated `cli.py` to catch `RuntimeError` from the summarizer and print the message to stderr with ex...
 
 ## Phase 6: Utilities
-- [ ] Implement `utils.py` with shared helpers: text truncation (cap input tokens to LLM), whitespace normalization
+- [x] Implement `utils.py` with shared helpers: text truncation (cap input tokens to LLM), whitespace normalization
+  - Created `consume/utils.py` with two shared helpers:
 
 ## Phase 7: Testing
 - [x] Write unit tests for URL validation logic
