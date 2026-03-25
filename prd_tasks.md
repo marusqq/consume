@@ -27,7 +27,8 @@
 ## Phase 3: Article Extraction
 - [x] Implement `extractor.py` with `fetch_html(url)` using `requests` (timeout, user-agent header)
   - Implemented `fetch_html(url)` in `extractor.py` using `requests.get` with a 10-second timeout and a ...
-- [ ] Implement `extract_content(html)` using `readability-lxml` to strip boilerplate and return main text
+- [x] Implement `extract_content(html)` using `readability-lxml` to strip boilerplate and return main text
+  - Renamed `extract_text` to `extract_content` as the primary implementation, using `readability-lxml`'...
 - [x] Implement fallback extraction for minimal pages (e.g. strip all tags, return raw visible text)
   - Implemented fallback in `extract_text()`: if `readability` returns empty content, strip all tags dir...
   - Added `test_fallback_to_raw_text_when_readability_returns_empty` to cover the fallback path

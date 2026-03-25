@@ -39,13 +39,14 @@ def _strip_tags(raw_html: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def extract_text(raw_html: str) -> str:
-    doc = Document(raw_html)
+def extract_content(html: str) -> str:
+    """Use readability-lxml to strip boilerplate and return the main article text."""
+    doc = Document(html)
     content_html = doc.summary()
     text = _strip_tags(content_html)
     if not text:
         # Fallback: strip all tags from the raw HTML directly
-        text = _strip_tags(raw_html)
+        text = _strip_tags(html)
     if not text:
         raise ValueError("No content could be extracted from the page.")
     if len(text) < MIN_CONTENT_LENGTH:
@@ -53,3 +54,7 @@ def extract_text(raw_html: str) -> str:
             f"Extracted content is too short ({len(text)} chars, minimum {MIN_CONTENT_LENGTH})."
         )
     return text
+
+
+# Alias for backward compatibility
+extract_text = extract_content
