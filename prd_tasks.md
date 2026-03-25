@@ -19,7 +19,7 @@
   - [x] Implemented `consume/cli.py` with `argparse`: positional `url` argument and optional `--mode short|l...
   - Implemented `cli.py` with `argparse` parser exposing positional `url` and `--mode short|long` argume...
   - Added `parse_args()` as a standalone function for testability
-  - Added `main()` that orchestrates `fetch_html` → `extract_text` → `summarize` → `print`
+  - [x] Added `main()` that orchestrates `fetch_html` → `extract_text` → `summarize` → `print`
   - Added `format_bullets()` to word-wrap bullet output to terminal width
   - Added `parse_args()` for testability and `main()` as the entry point
 - [x] Implement URL format validation (reject malformed URLs before making any network calls)
