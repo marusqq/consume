@@ -2,6 +2,8 @@ import os
 
 import anthropic
 
+from .utils import truncate_text
+
 SHORT_BULLETS = 3
 DEFAULT_BULLETS = 5
 LONG_BULLETS_MIN = 8
@@ -21,6 +23,7 @@ SYSTEM_PROMPT = (
 
 
 def summarize(text: str, mode: str = "default") -> str:
+    text = truncate_text(text)
     if mode == "short":
         user_prompt = f"Summarize the following article in exactly {SHORT_BULLETS} bullet points:\n\n{text}"
     elif mode == "long":

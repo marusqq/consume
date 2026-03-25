@@ -105,7 +105,10 @@
 
 ## Phase 6: Utilities
 - [x] Implement `utils.py` with shared helpers: text truncation (cap input tokens to LLM), whitespace normalization
-  - Created `consume/utils.py` with two shared helpers:
+  - [x] Created `consume/utils.py` with two shared helpers:
+  - Created `consume/utils.py` with `normalize_whitespace(text)` (collapses whitespace via regex) and `t...
+  - Updated `consume/extractor.py` to import and use `normalize_whitespace` in `_strip_tags`, removing d...
+  - Updated `consume/summarizer.py` to import `truncate_text` and apply it at the start of `summarize()`...
 
 ## Phase 7: Testing
 - [x] Write unit tests for URL validation logic

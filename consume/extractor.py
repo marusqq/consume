@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 import requests
 from readability import Document
 
+from .utils import normalize_whitespace
+
 TIMEOUT = 10
 USER_AGENT = "consume/1.0 (content reader)"
 MIN_CONTENT_LENGTH = 50
@@ -36,7 +38,7 @@ def _strip_tags(raw_html: str) -> str:
     """Strip all HTML tags, unescape entities, and collapse whitespace."""
     text = re.sub(r"<[^>]+>", " ", raw_html)
     text = html.unescape(text)
-    return re.sub(r"\s+", " ", text).strip()
+    return normalize_whitespace(text)
 
 
 def extract_text(html: str) -> str:
