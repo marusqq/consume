@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import anthropic
 import pytest
 
-from consume.summarizer import SHORT_BULLETS, LONG_BULLETS, DEFAULT_MODEL, summarize
+from consume.summarizer import SHORT_BULLETS, DEFAULT_BULLETS, LONG_BULLETS_MIN, LONG_BULLETS_MAX, DEFAULT_MODEL, summarize
 
 
 def make_message(text: str) -> MagicMock:
@@ -45,7 +45,7 @@ class TestSummarize:
         summarize(SAMPLE_TEXT, mode="long")
         call_kwargs = mock_client.messages.create.call_args
         messages = call_kwargs.kwargs["messages"]
-        assert f"exactly {LONG_BULLETS} bullet points" in messages[0]["content"]
+        assert f"between {LONG_BULLETS_MIN} and {LONG_BULLETS_MAX} bullet points" in messages[0]["content"]
 
     @patch("consume.summarizer.anthropic.Anthropic")
     def test_strips_leading_trailing_whitespace(self, mock_anthropic):
@@ -95,13 +95,22 @@ class TestSummarize:
             summarize(SAMPLE_TEXT)
 
     @patch("consume.summarizer.anthropic.Anthropic")
-    def test_default_mode_is_short(self, mock_anthropic):
+    def test_default_mode_uses_default_bullets(self, mock_anthropic):
         mock_client = mock_anthropic.return_value
         mock_client.messages.create.return_value = make_message(BULLET_RESPONSE)
         summarize(SAMPLE_TEXT)
         call_kwargs = mock_client.messages.create.call_args
         messages = call_kwargs.kwargs["messages"]
-        assert f"exactly {SHORT_BULLETS} bullet points" in messages[0]["content"]
+        assert f"exactly {DEFAULT_BULLETS} bullet points" in messages[0]["content"]
+
+    @patch("consume.summarizer.anthropic.Anthropic")
+    def test_explicit_default_mode_uses_default_bullets(self, mock_anthropic):
+        mock_client = mock_anthropic.return_value
+        mock_client.messages.create.return_value = make_message(BULLET_RESPONSE)
+        summarize(SAMPLE_TEXT, mode="default")
+        call_kwargs = mock_client.messages.create.call_args
+        messages = call_kwargs.kwargs["messages"]
+        assert f"exactly {DEFAULT_BULLETS} bullet points" in messages[0]["content"]
 
     @patch("consume.summarizer.anthropic.Anthropic")
     def test_uses_default_model_when_env_not_set(self, mock_anthropic):

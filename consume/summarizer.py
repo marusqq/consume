@@ -2,8 +2,10 @@ import os
 
 import anthropic
 
-SHORT_BULLETS = 5
-LONG_BULLETS = 9
+SHORT_BULLETS = 3
+DEFAULT_BULLETS = 5
+LONG_BULLETS_MIN = 8
+LONG_BULLETS_MAX = 10
 
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 
@@ -14,13 +16,19 @@ SYSTEM_PROMPT = (
     "2. Every bullet starts with the '•' character followed by a single space.\n"
     "3. Each bullet is ≤15 words and states a verifiable fact from the source text.\n"
     "4. Do not infer, editorialize, or add information not present in the source.\n"
-    "5. Output exactly the number of bullets requested — no more, no fewer."
+    "5. Output the exact number of bullets requested — no more, no fewer."
 )
 
 
-def summarize(text: str, mode: str = "short") -> str:
-    n = SHORT_BULLETS if mode == "short" else LONG_BULLETS
-    user_prompt = f"Summarize the following article in exactly {n} bullet points:\n\n{text}"
+def summarize(text: str, mode: str = "default") -> str:
+    if mode == "short":
+        user_prompt = f"Summarize the following article in exactly {SHORT_BULLETS} bullet points:\n\n{text}"
+    elif mode == "long":
+        user_prompt = (
+            f"Summarize the following article in between {LONG_BULLETS_MIN} and {LONG_BULLETS_MAX} bullet points:\n\n{text}"
+        )
+    else:
+        user_prompt = f"Summarize the following article in exactly {DEFAULT_BULLETS} bullet points:\n\n{text}"
 
     model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
     client = anthropic.Anthropic()

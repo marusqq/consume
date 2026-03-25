@@ -45,7 +45,12 @@
   - Added error handling for `AuthenticationError`, `RateLimitError`, `APITimeoutError`, and generic `AP...
 - [x] Write the system prompt enforcing factual, bullet-only output (default: 5 bullets, ≤15 words each)
   - Updated `SHORT_BULLETS` from 3 to 5 to match the required default bullet count
-- [ ] Implement mode-based prompt variation: `short` → 3 bullets, `long` → 8–10 bullets, `default` → 5 bullets
+- [x] Implement mode-based prompt variation: `short` → 3 bullets, `long` → 8–10 bullets, `default` → 5 bullets
+  - Updated `SHORT_BULLETS = 3`, added `DEFAULT_BULLETS = 5`, replaced `LONG_BULLETS` with `LONG_BULLETS...
+  - Changed `summarize()` default parameter from `mode="short"` to `mode="default"`
+  - Implemented three-branch prompt logic: `short` → "exactly 3 bullets", `long` → "between 8 and 10...
+  - Updated system prompt rule #5 wording to accommodate ranges
+  - Updated test imports to use new constant names
 - [x] Make LLM provider/model configurable via environment variable
   - Updated `summarizer.py` to read the `CONSUME_MODEL` environment variable (falling back to `DEFAULT_M...
   - Added `DEFAULT_MODEL` constant and `import os` to `summarizer.py`
