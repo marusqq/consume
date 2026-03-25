@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import anthropic
 import pytest
 
-from consume.summarizer import SHORT_BULLETS, LONG_BULLETS, summarize
+from consume.summarizer import SHORT_BULLETS, LONG_BULLETS, DEFAULT_MODEL, summarize
 
 
 def make_message(text: str) -> MagicMock:
@@ -102,3 +102,23 @@ class TestSummarize:
         call_kwargs = mock_client.messages.create.call_args
         messages = call_kwargs.kwargs["messages"]
         assert f"exactly {SHORT_BULLETS} bullet points" in messages[0]["content"]
+
+    @patch("consume.summarizer.anthropic.Anthropic")
+    def test_uses_default_model_when_env_not_set(self, mock_anthropic):
+        mock_client = mock_anthropic.return_value
+        mock_client.messages.create.return_value = make_message(BULLET_RESPONSE)
+        with patch.dict("os.environ", {}, clear=False):
+            import os
+            os.environ.pop("CONSUME_MODEL", None)
+            summarize(SAMPLE_TEXT)
+        call_kwargs = mock_client.messages.create.call_args
+        assert call_kwargs.kwargs["model"] == DEFAULT_MODEL
+
+    @patch("consume.summarizer.anthropic.Anthropic")
+    def test_uses_model_from_env_var(self, mock_anthropic):
+        mock_client = mock_anthropic.return_value
+        mock_client.messages.create.return_value = make_message(BULLET_RESPONSE)
+        with patch.dict("os.environ", {"CONSUME_MODEL": "claude-opus-4-6"}):
+            summarize(SAMPLE_TEXT)
+        call_kwargs = mock_client.messages.create.call_args
+        assert call_kwargs.kwargs["model"] == "claude-opus-4-6"

@@ -32,7 +32,10 @@
 - [ ] Implement `summarizer.py` with `summarize(text, mode)` that calls the configured LLM API
 - [ ] Write the system prompt enforcing factual, bullet-only output (default: 5 bullets, ≤15 words each)
 - [ ] Implement mode-based prompt variation: `short` → 3 bullets, `long` → 8–10 bullets, `default` → 5 bullets
-- [ ] Make LLM provider/model configurable via environment variable
+- [x] Make LLM provider/model configurable via environment variable
+  - Updated `summarizer.py` to read the `CONSUME_MODEL` environment variable (falling back to `DEFAULT_M...
+  - Added `DEFAULT_MODEL` constant and `import os` to `summarizer.py`
+  - Added two new unit tests: `test_uses_default_model_when_env_not_set` and `test_uses_model_from_env_v...
 
 ## Phase 5: Error Handling
 - [x] Handle invalid URL error with a clear user-facing message and non-zero exit code
