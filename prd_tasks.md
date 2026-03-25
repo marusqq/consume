@@ -7,7 +7,8 @@
   - Created `consume/` package directory
   - Created `consume/__init__.py` to mark it as a Python package
 - [x] Create `pyproject.toml` or `setup.py` with dependencies: `requests`, `readability-lxml`, `anthropic` (or chosen LLM SDK)
-  - Created `pyproject.toml` with dependencies: `requests`, `readability-lxml`, and `anthropic`
+  - [x] Created `pyproject.toml` with dependencies: `requests`, `readability-lxml`, and `anthropic`
+  - Created `pyproject.toml` with `requests`, `readability-lxml`, and `anthropic` dependencies (already ...
 - [ ] Set up environment variable loading for LLM API key configuration
 
 ## Phase 2: CLI Entry Point
