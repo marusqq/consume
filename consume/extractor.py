@@ -31,14 +31,20 @@ def fetch_html(url: str) -> str:
     return response.text
 
 
+def _strip_tags(raw_html: str) -> str:
+    """Strip all HTML tags, unescape entities, and collapse whitespace."""
+    text = re.sub(r"<[^>]+>", " ", raw_html)
+    text = html.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def extract_text(raw_html: str) -> str:
     doc = Document(raw_html)
     content_html = doc.summary()
-    # Strip HTML tags
-    text = re.sub(r"<[^>]+>", " ", content_html)
-    # Unescape HTML entities and collapse whitespace
-    text = html.unescape(text)
-    text = re.sub(r"\s+", " ", text).strip()
+    text = _strip_tags(content_html)
+    if not text:
+        # Fallback: strip all tags from the raw HTML directly
+        text = _strip_tags(raw_html)
     if not text:
         raise ValueError("No content could be extracted from the page.")
     return text

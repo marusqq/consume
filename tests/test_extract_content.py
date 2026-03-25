@@ -50,6 +50,13 @@ class TestExtractText:
         assert "<" not in result
         assert ">" not in result
 
+    def test_fallback_to_raw_text_when_readability_returns_empty(self):
+        # readability returns empty summary for very sparse pages; fallback strips raw HTML
+        sparse = "<html><body><p>Just this.</p></body></html>"
+        result = extract_text(sparse)
+        assert "Just this." in result
+        assert "<" not in result
+
     def test_empty_html_raises(self):
         with pytest.raises(ValueError, match="No content"):
             extract_text("<html><body></body></html>")
