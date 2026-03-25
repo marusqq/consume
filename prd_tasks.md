@@ -8,7 +8,7 @@
   - Created `consume/__init__.py` to mark it as a Python package
 - [x] Create `pyproject.toml` or `setup.py` with dependencies: `requests`, `readability-lxml`, `anthropic` (or chosen LLM SDK)
   - [x] Created `pyproject.toml` with dependencies: `requests`, `readability-lxml`, and `anthropic`
-  - Created `pyproject.toml` with `requests`, `readability-lxml`, and `anthropic` dependencies (already ...
+  - [x] Created `pyproject.toml` with `requests`, `readability-lxml`, and `anthropic` dependencies (already ...
 - [x] Set up environment variable loading for LLM API key configuration
   - Added `python-dotenv` to `pyproject.toml` dependencies
   - Added `load_dotenv()` call in `cli.py` so a `.env` file is loaded at startup before any API calls
