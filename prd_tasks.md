@@ -19,7 +19,8 @@
 - [ ] Implement clean bullet-point terminal output formatter in `cli.py`
 
 ## Phase 3: Article Extraction
-- [ ] Implement `extractor.py` with `fetch_html(url)` using `requests` (timeout, user-agent header)
+- [x] Implement `extractor.py` with `fetch_html(url)` using `requests` (timeout, user-agent header)
+  - Implemented `fetch_html(url)` in `extractor.py` using `requests.get` with a 10-second timeout and a ...
 - [ ] Implement `extract_content(html)` using `readability-lxml` to strip boilerplate and return main text
 - [ ] Implement fallback extraction for minimal pages (e.g. strip all tags, return raw visible text)
 - [ ] Add content length check — raise extraction failure if result is below a minimum threshold
