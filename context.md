@@ -1,1 +1,1 @@
-`context.md` updated — 117 lines covering the full pipeline, all components, test suite table, env vars, architecture notes, and a recent changes section reflecting the latest work.
+`context.md` updated — 113 lines covering the full pipeline, all components, test suite, env vars, architecture notes, and a recent changes section reflecting integration test, CLI entry point, README, `parse_args` refactor, `CONSUME_MODEL`, and `.env.example` work.
