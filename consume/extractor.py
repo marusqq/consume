@@ -11,6 +11,9 @@ TIMEOUT = 10
 USER_AGENT = "consume/1.0 (content reader)"
 MIN_CONTENT_LENGTH = 50
 
+_X_DOMAINS = {"x.com", "twitter.com", "www.x.com", "www.twitter.com"}
+_X_OEMBED_URL = "https://publish.twitter.com/oembed"
+
 
 def _validate_url(url: str) -> None:
     parsed = urlparse(url)
@@ -18,8 +21,33 @@ def _validate_url(url: str) -> None:
         raise ValueError(f"Invalid URL: '{url}'. Expected a URL starting with http:// or https://")
 
 
+def _is_x_url(url: str) -> bool:
+    return urlparse(url).netloc in _X_DOMAINS
+
+
+def _fetch_x_html(url: str) -> str:
+    try:
+        response = requests.get(
+            _X_OEMBED_URL,
+            params={"url": url},
+            timeout=TIMEOUT,
+            headers={"User-Agent": USER_AGENT},
+        )
+        response.raise_for_status()
+    except requests.exceptions.Timeout:
+        raise TimeoutError(f"Request timed out after {TIMEOUT}s: '{url}'")
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError(f"Could not connect to '{url}'. Check your network connection.")
+    data = response.json()
+    author = data.get("author_name", "")
+    tweet_html = data.get("html", "")
+    return f"<html><body><h1>{author}</h1>{tweet_html}</body></html>"
+
+
 def fetch_html(url: str) -> str:
     _validate_url(url)
+    if _is_x_url(url):
+        return _fetch_x_html(url)
     try:
         response = requests.get(
             url,
