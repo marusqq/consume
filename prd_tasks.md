@@ -162,7 +162,8 @@
   - Added `CONSUME_MODEL` env var override for the model
   - Added error handling for `AuthenticationError`, `RateLimitError`, `APITimeoutError`, and generic `AP...
   - Added error handling that converts `AuthenticationError`, `RateLimitError`, `APITimeoutError`, and g...
-  - Added structured system prompt enforcing bullet-point-only output with `•` prefix
+  - [x] Added structured system prompt enforcing bullet-point-only output with `•` prefix
+  - Added `SYSTEM_PROMPT` constant in `consume/summarizer.py` that enforces bullet-point-only output wit...
   - Added three modes: `short` (3 bullets), `default` (5 bullets), `long` (8–10 bullets)
   - Added error handling for `AuthenticationError`, `RateLimitError`, `APITimeoutError`, and `APIError`
   - Added `CONSUME_MODEL` environment variable override for model selection
