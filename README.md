@@ -42,7 +42,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 ## Usage
 
 ```
-consume <url> [--mode short|long]
+consume <url> [--mode short|default|long]
 ```
 
 **Arguments**
@@ -50,7 +50,7 @@ consume <url> [--mode short|long]
 | Argument | Default | Description |
 |---|---|---|
 | `url` | — | The article URL to summarize (must start with `http://` or `https://`). |
-| `--mode` | `short` | Summary length: `short` (3 bullets) or `long` (9 bullets). |
+| `--mode` | `short` | Summary length: `short` (3 bullets), `default` (5 bullets), or `long` (8–10 bullets). |
 
 ## Examples
 
@@ -71,7 +71,8 @@ consume https://example.com/article --mode long
 | Mode | Bullets | Use when |
 |---|---|---|
 | `short` | 3 | Quick scan — you want the gist fast. |
-| `long` | 9 | Deeper read — you want more detail without reading the full article. |
+| `default` | 5 | Balanced summary — more context than short, still concise. |
+| `long` | 8–10 | Deeper read — you want more detail without reading the full article. |
 
 ## Error Handling
 
