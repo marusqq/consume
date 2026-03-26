@@ -28,6 +28,10 @@ class TestParseArgs:
         args = parse_args(["https://example.com", "--mode", "short"])
         assert args.mode == "short"
 
+    def test_mode_default_explicit(self):
+        args = parse_args(["https://example.com", "--mode", "default"])
+        assert args.mode == "default"
+
     def test_invalid_mode_exits(self):
         with pytest.raises(SystemExit):
             parse_args(["https://example.com", "--mode", "invalid"])

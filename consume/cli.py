@@ -51,9 +51,9 @@ def parse_args(args=None):
     parser.add_argument("url", help="URL to consume")
     parser.add_argument(
         "--mode",
-        choices=["short", "long"],
+        choices=["short", "default", "long"],
         default="short",
-        help="Output mode: short (default) or long",
+        help="Output mode: short (3 bullets, default), default (5 bullets), or long (8-10 bullets)",
     )
     return parser.parse_args(args)
 
