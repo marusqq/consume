@@ -41,7 +41,7 @@ def _strip_tags(raw_html: str) -> str:
     return normalize_whitespace(text)
 
 
-def extract_text(html: str) -> str:
+def extract_content(html: str) -> str:
     """Use readability-lxml to strip boilerplate and return the main article text."""
     doc = Document(html)
     content_html = doc.summary()

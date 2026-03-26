@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from consume.extractor import extract_text, fetch_html
+from consume.extractor import extract_content, fetch_html
 from consume.summarizer import summarize
 
 _BULLET = "•"
@@ -77,7 +77,7 @@ def main():
         sys.exit(1)
 
     try:
-        text = extract_text(raw_html)
+        text = extract_content(raw_html)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)

@@ -93,7 +93,7 @@ class TestMainEmptyContent:
         with (
             patch("consume.cli.fetch_html", return_value="<html></html>"),
             patch(
-                "consume.cli.extract_text",
+                "consume.cli.extract_content",
                 side_effect=ValueError(
                     "No readable content could be extracted from this page. "
                     "The page may require JavaScript, be behind a login, or contain only images."
@@ -111,7 +111,7 @@ class TestMainEmptyContent:
         with (
             patch("consume.cli.fetch_html", return_value="<html><body>hi</body></html>"),
             patch(
-                "consume.cli.extract_text",
+                "consume.cli.extract_content",
                 side_effect=ValueError("Extracted content is too short (2 chars, minimum 50)."),
             ),
             pytest.raises(SystemExit) as exc_info,
@@ -126,7 +126,7 @@ class TestMainEmptyContent:
         with (
             patch("consume.cli.fetch_html", return_value="<html></html>"),
             patch(
-                "consume.cli.extract_text",
+                "consume.cli.extract_content",
                 side_effect=ValueError("No readable content could be extracted from this page."),
             ),
             pytest.raises(SystemExit) as exc_info,
@@ -186,7 +186,7 @@ class TestMainSummarizeErrors:
     def test_runtime_error_from_summarize_exits_with_code_1(self, capsys):
         with (
             patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
-            patch("consume.cli.extract_text", return_value="Some readable content here."),
+            patch("consume.cli.extract_content", return_value="Some readable content here."),
             patch("consume.cli.summarize", side_effect=RuntimeError("API key missing")),
             pytest.raises(SystemExit) as exc_info,
         ):
@@ -199,7 +199,7 @@ class TestMainSummarizeErrors:
     def test_unexpected_summarize_error_exits_with_code_1(self, capsys):
         with (
             patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
-            patch("consume.cli.extract_text", return_value="Some readable content here."),
+            patch("consume.cli.extract_content", return_value="Some readable content here."),
             patch("consume.cli.summarize", side_effect=Exception("network failure")),
             pytest.raises(SystemExit) as exc_info,
         ):
