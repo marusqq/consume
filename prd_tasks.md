@@ -43,7 +43,7 @@
   - Updated import in `test_cli.py` to include `parse_args`
   - [x] Added `main()` that orchestrates `fetch_html` → `extract_text` → `summarize` → `print`
   - Added `format_bullets()` to word-wrap bullet output to terminal width
-  - Added `parse_args()` for testability and `main()` as the entry point
+  - [x] Added `parse_args()` for testability and `main()` as the entry point
 - [x] Implement URL format validation (reject malformed URLs before making any network calls)
   - [x] Implemented `_validate_url()` in `consume/extractor.py` (`extractor.py:12-15`) — rejects URLs with...
   - [x] Implemented `_validate_url(url)` in `consume/extractor.py` that rejects URLs with non-http/https sch...
