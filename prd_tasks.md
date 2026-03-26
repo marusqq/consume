@@ -196,7 +196,8 @@
   - [x] Updated `README.md` usage synopsis from `short|long` to `short|default|long`
   - [x] Updated `README.md` Modes table to add the `default` row and correct `long` bullet count
   - [x] Updated Modes table: added `default` row with 5 bullets
-  - Updated `README.md` Modes table to include the `default` row (`5` bullets, "Balanced summary — mor...
+  - [x] Updated `README.md` Modes table to include the `default` row (`5` bullets, "Balanced summary — mor...
+  - Updated `README.md` Modes table — the `default` row (`5` bullets, "Balanced summary — more conte...
   - Fixed `long` bullet count from `9` to `8–10`
   - Updated `--mode` argument description in the Arguments table
   - Updated usage synopsis from `short|long` to `short|default|long`
