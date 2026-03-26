@@ -1,10 +1,36 @@
-"""Unit tests for cli.format_bullets and cli.main."""
+"""Unit tests for cli.format_bullets, cli.parse_args, and cli.main."""
 
 from unittest.mock import patch
 
 import pytest
 
-from consume.cli import format_bullets, main
+from consume.cli import format_bullets, main, parse_args
+
+
+class TestParseArgs:
+    def test_url_is_required(self):
+        with pytest.raises(SystemExit):
+            parse_args([])
+
+    def test_url_stored(self):
+        args = parse_args(["https://example.com"])
+        assert args.url == "https://example.com"
+
+    def test_default_mode_is_short(self):
+        args = parse_args(["https://example.com"])
+        assert args.mode == "short"
+
+    def test_mode_long(self):
+        args = parse_args(["https://example.com", "--mode", "long"])
+        assert args.mode == "long"
+
+    def test_mode_short_explicit(self):
+        args = parse_args(["https://example.com", "--mode", "short"])
+        assert args.mode == "short"
+
+    def test_invalid_mode_exits(self):
+        with pytest.raises(SystemExit):
+            parse_args(["https://example.com", "--mode", "invalid"])
 
 
 class TestFormatBullets:
