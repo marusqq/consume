@@ -122,7 +122,7 @@
   - Updated `SHORT_BULLETS` from 3 to 5 to match the required default bullet count
 - [x] Implement mode-based prompt variation: `short` → 3 bullets, `long` → 8–10 bullets, `default` → 5 bullets
   - Updated `SHORT_BULLETS = 3`, added `DEFAULT_BULLETS = 5`, replaced `LONG_BULLETS` with `LONG_BULLETS...
-  - Changed `summarize()` default parameter from `mode="short"` to `mode="default"`
+  - [x] Changed `summarize()` default parameter from `mode="short"` to `mode="default"`
   - Implemented three-branch prompt logic: `short` → "exactly 3 bullets", `long` → "between 8 and 10...
   - Updated system prompt rule #5 wording to accommodate ranges
   - Updated test imports to use new constant names
