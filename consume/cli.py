@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from consume.extractor import extract_content, fetch_html
-from consume.summarizer import summarize
+from consume.summarizer import DEFAULT_BULLETS, LONG_BULLETS_MAX, LONG_BULLETS_MIN, SHORT_BULLETS, summarize
 
 _BULLET = "•"
 _INDENT = "  "  # continuation-line indent (2 spaces)
@@ -53,7 +53,7 @@ def parse_args(args=None):
         "--mode",
         choices=["short", "default", "long"],
         default="short",
-        help="Output mode: short (3 bullets, default), default (5 bullets), or long (8-10 bullets)",
+        help=f"Output mode: short ({SHORT_BULLETS} bullets, default), default ({DEFAULT_BULLETS} bullets), or long ({LONG_BULLETS_MIN}-{LONG_BULLETS_MAX} bullets)",
     )
     return parser.parse_args(args)
 
