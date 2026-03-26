@@ -1,1 +1,1 @@
-`context.md` updated — 111 lines covering all module signatures, constants, pipeline architecture, the 6-file test suite table, dev/env notes, and a Recent Changes section reflecting the latest work on modes, `format_bullets`, integration tests, and CLI entry point registration.
+`context.md` updated — 113 lines covering all module signatures, constants, pipeline architecture, mode/bullet-count table, 6-file test suite, dev/env notes, and a Recent Changes section reflecting the latest work.
