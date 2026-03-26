@@ -1,1 +1,1 @@
-`context.md` updated — 114 lines covering the full pipeline, all components, test suite, env vars, architecture notes, and a Recent Changes section reflecting `summarizer.py` finalisation, `parse_args` refactor, `format_bullets`, integration smoke test, CLI entry point, README, and `.env.example` work.
+`context.md` updated — 112 lines covering the full pipeline, all components, test suite, env vars, architecture notes, and a Recent Changes section reflecting the integration smoke test, CLI entry point, README, `.env.example`, `parse_args` refactor, and `format_bullets` work.
