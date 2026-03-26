@@ -1,0 +1,6 @@
+- [x] Make X articles available to consume
+  - Updated `parse_args()` to accept `urls` as `nargs="+"` (one or more positional arguments)
+  - Updated `main()` to iterate over multiple URLs, printing `=== <url> ===` headers and blank-line sepa...
+  - Updated existing `test_url_stored` → `test_single_url_stored` to match new `args.urls` attribute
+  - Added `test_multiple_urls_stored` test for multi-URL parsing
+  - Added `TestMainMultipleUrls` class with tests for headers, partial failure exit code, and single-URL...

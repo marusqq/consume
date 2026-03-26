@@ -12,9 +12,13 @@ class TestParseArgs:
         with pytest.raises(SystemExit):
             parse_args([])
 
-    def test_url_stored(self):
+    def test_single_url_stored(self):
         args = parse_args(["https://example.com"])
-        assert args.url == "https://example.com"
+        assert args.urls == ["https://example.com"]
+
+    def test_multiple_urls_stored(self):
+        args = parse_args(["https://example.com", "https://example.org"])
+        assert args.urls == ["https://example.com", "https://example.org"]
 
     def test_default_mode_is_short(self):
         args = parse_args(["https://example.com"])
@@ -214,9 +218,55 @@ class TestMainSummarizeErrors:
         assert "Error" in captured.err
 
 
+class TestMainMultipleUrls:
+    def test_multiple_urls_prints_header_for_each(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
+            patch("consume.cli.extract_content", return_value="Some readable content here."),
+            patch("consume.cli.summarize", return_value="• A bullet point"),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main(["https://example.com", "https://example.org"])
+
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert "=== https://example.com ===" in captured.out
+        assert "=== https://example.org ===" in captured.out
+
+    def test_multiple_urls_partial_failure_exits_with_code_1(self, capsys):
+        def fake_fetch(url):
+            if "bad" in url:
+                raise ValueError("Invalid URL: 'bad'")
+            return "<html><body>content</body></html>"
+
+        with (
+            patch("consume.cli.fetch_html", side_effect=fake_fetch),
+            patch("consume.cli.extract_content", return_value="Some readable content here."),
+            patch("consume.cli.summarize", return_value="• A bullet point"),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main(["https://example.com", "bad://url"])
+
+        assert exc_info.value.code == 1
+
+    def test_single_url_no_header_printed(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
+            patch("consume.cli.extract_content", return_value="Some readable content here."),
+            patch("consume.cli.summarize", return_value="• A bullet point"),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main(["https://example.com"])
+
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert "===" not in captured.out
+
+
 def _run_main(args=None):
     """Helper to invoke main() with patched sys.argv."""
     import sys
 
-    with patch.object(sys, "argv", ["consume", "https://example.com"]):
+    argv = ["consume"] + (args if args is not None else ["https://example.com"])
+    with patch.object(sys, "argv", argv):
         main()

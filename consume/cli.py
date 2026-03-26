@@ -48,7 +48,7 @@ def format_bullets(summary: str) -> str:
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(description="Consume and summarize content from a URL")
-    parser.add_argument("url", help="URL to consume")
+    parser.add_argument("urls", nargs="+", metavar="url", help="One or more URLs to consume")
     parser.add_argument(
         "--mode",
         choices=["short", "default", "long"],
@@ -58,40 +58,58 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def main():
-    args = parse_args()
-
+def _process_url(url: str, mode: str) -> int:
+    """Fetch, extract, and summarize a single URL. Returns exit code (0 or 1)."""
     try:
-        raw_html = fetch_html(args.url)
+        raw_html = fetch_html(url)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
     except TimeoutError as e:
         print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
     except ConnectionError as e:
         print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
     except Exception as e:
         print(f"Error fetching URL: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     try:
         text = extract_content(raw_html)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     try:
-        summary = summarize(text, mode=args.mode)
+        summary = summarize(text, mode=mode)
     except RuntimeError as e:
         print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
     except Exception as e:
         print(f"Error summarizing content: {e}", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     print(format_bullets(summary))
+    return 0
+
+
+def main():
+    args = parse_args()
+
+    if len(args.urls) == 1:
+        sys.exit(_process_url(args.urls[0], args.mode))
+
+    exit_code = 0
+    for i, url in enumerate(args.urls):
+        if i > 0:
+            print()
+        print(f"=== {url} ===")
+        result = _process_url(url, args.mode)
+        if result != 0:
+            exit_code = result
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
