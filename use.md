@@ -63,7 +63,7 @@ _Last updated: 2026-03-26_
 
 ### Tests
 - `tests/test_url_validation.py` — 11 unit tests for `_validate_url`
-- `tests/test_extract_content.py` — 10 tests for `extract_text()` using HTML fixtures
+- `tests/test_extract_content.py` — 10 unit tests for `extract_text()`
 - `tests/test_summarize.py` — 11 unit tests with mocked API
 - `tests/test_cli.py` — 9 unit tests for `format_bullets`
 - `tests/test_integration_smoke.py` — live smoke test (marked `@pytest.mark.integration`)
