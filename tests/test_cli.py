@@ -136,6 +136,80 @@ class TestMainEmptyContent:
         assert exc_info.value.code == 1
 
 
+class TestMainFetchErrors:
+    def test_invalid_url_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", side_effect=ValueError("Invalid URL: 'bad'")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "Invalid URL" in captured.err
+
+    def test_timeout_error_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", side_effect=TimeoutError("Request timed out after 10s")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "timed out" in captured.err
+
+    def test_connection_error_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", side_effect=ConnectionError("Could not connect")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "connect" in captured.err
+
+    def test_unexpected_fetch_error_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", side_effect=RuntimeError("unexpected")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "Error" in captured.err
+
+
+class TestMainSummarizeErrors:
+    def test_runtime_error_from_summarize_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
+            patch("consume.cli.extract_text", return_value="Some readable content here."),
+            patch("consume.cli.summarize", side_effect=RuntimeError("API key missing")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "API key missing" in captured.err
+
+    def test_unexpected_summarize_error_exits_with_code_1(self, capsys):
+        with (
+            patch("consume.cli.fetch_html", return_value="<html><body>content</body></html>"),
+            patch("consume.cli.extract_text", return_value="Some readable content here."),
+            patch("consume.cli.summarize", side_effect=Exception("network failure")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            _run_main()
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "Error" in captured.err
+
+
 def _run_main(args=None):
     """Helper to invoke main() with patched sys.argv."""
     import sys
