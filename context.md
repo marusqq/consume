@@ -1,1 +1,1 @@
-`context.md` updated — 113 lines covering the full pipeline, all components, test suite table, and recent changes.
+`context.md` updated — 112 lines covering the full pipeline, all components, test suite table, architecture notes, and a recent changes section.
