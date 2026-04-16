@@ -1,0 +1,19 @@
+# urls.txt — batch consume list
+#
+# Add one URL per line.
+# Lines starting with # are comments and are ignored.
+# Blank lines are ignored.
+#
+# Run with:
+#   consume batch                          (uses this file, short mode, text output)
+#   consume batch --mode auto              (Claude decides bullet count)
+#   consume batch --mode auto --format pdf (save each as PDF)
+#   consume batch urls.txt                 (explicit file path)
+#
+# Already-consumed URLs are skipped automatically (reads from library cache).
+# A random delay of 8–20 seconds is added between requests.
+# Every 10 articles a longer break of 45–90 seconds is taken.
+
+# https://example.com/article-one
+# https://example.com/article-two
+# https://x.com/user/status/123456789

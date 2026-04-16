@@ -56,6 +56,8 @@ def parse_args(args=None):
         epilog=(
             "commands:\n"
             "  consume login               log in to X (saves cookies for articles)\n"
+            "  consume batch [file]        process URLs from a file with safe delays\n"
+            "                             (defaults to urls.txt in current directory)\n"
             "\n"
             "examples:\n"
             "  consume https://example.com/article\n"
@@ -63,7 +65,9 @@ def parse_args(args=None):
             "  consume --mode auto --format pdf https://x.com/user/status/123\n"
             "  consume --mode auto --format audio --out summary.mp3 https://example.com\n"
             "  consume --mode auto --format markdown --out summary.md https://example.com\n"
-            "  consume url1 url2 url3"
+            "  consume url1 url2 url3\n"
+            "  consume batch\n"
+            "  consume batch --mode auto --format pdf my-list.txt"
         ),
     )
     parser.add_argument("urls", nargs="+", metavar="url", help="One or more URLs to consume")
@@ -206,7 +210,7 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
 
 
 def main():
-    # Handle 'login' before argparse so URL positional args are unaffected
+    # Handle subcommands before argparse so URL positional args are unaffected
     if len(sys.argv) > 1 and sys.argv[1] == "login":
         from consume.auth import login_interactive, cookies_path
         try:
@@ -220,6 +224,24 @@ def main():
             print("Login cancelled — you must complete the login before pressing Enter.", file=sys.stderr)
             sys.exit(1)
         return
+
+    if len(sys.argv) > 1 and sys.argv[1] == "batch":
+        # consume batch [file] [--mode MODE] [--format FORMAT] [--voice VOICE]
+        import argparse as _ap
+        from consume.batch import run_batch
+        p = _ap.ArgumentParser(prog="consume batch")
+        p.add_argument("file", nargs="?", default="urls.txt",
+                       help="Path to URL list file (default: urls.txt)")
+        p.add_argument("--mode", choices=["short", "default", "long", "auto"], default="short")
+        p.add_argument("--format", choices=["text", "markdown", "pdf", "audio"], default="text")
+        p.add_argument("--voice", default=None)
+        batch_args = p.parse_args(sys.argv[2:])
+        sys.exit(run_batch(
+            Path(batch_args.file),
+            batch_args.mode,
+            batch_args.format,
+            batch_args.voice,
+        ))
 
     args = parse_args()
 
