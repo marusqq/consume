@@ -227,6 +227,17 @@ def main():
             sys.exit(1)
         return
 
+    if len(sys.argv) > 1 and sys.argv[1] == "relabel":
+        from consume.library import relabel
+        renamed = relabel(Path.cwd())
+        if not renamed:
+            print("Nothing to relabel — all entries already have descriptive names.")
+        else:
+            for url, old, new in renamed:
+                print(f"{old}  →  {new}")
+            print(f"\nRelabeled {len(renamed)} entr{'y' if len(renamed) == 1 else 'ies'}.")
+        return
+
     if len(sys.argv) > 1 and sys.argv[1] == "batch":
         # consume batch [file] [--mode MODE] [--format FORMAT] [--voice VOICE]
         import argparse as _ap

@@ -17,3 +17,32 @@
 # https://example.com/article-one
 # https://example.com/article-two
 # https://x.com/user/status/123456789
+
+https://x.com/dabit3/status/2021387483364151451
+https://x.com/bcherny/status/2017742741636321619
+https://x.com/aashatwt/status/2016545386958361009
+https://x.com/ryancarson/status/2016520542723924279
+https://x.com/rohit4verse/status/2012925228159295810
+https://x.com/arscontexta/status/2023957499183829467
+https://x.com/hooeem/status/2031755971265974632
+https://x.com/CodevolutionWeb/status/2032120093526630854
+https://x.com/aiedge_/status/2032466807043580159
+https://x.com/hooeem/status/2032201610374349211
+https://x.com/DhravyaShah/status/2017039283367137690
+https://x.com/aiedge_/status/2016553316851896790
+https://x.com/addyosmani/status/2029372736267805081
+https://x.com/zostaff/status/2044029508404093120
+https://x.com/polydao/status/2044317956893471081
+https://x.com/k1rallik/status/2038978638381531486
+https://x.com/kirillk_web3/status/2037192322660655132
+https://x.com/NickSpisak_/status/2042993832531275882
+https://x.com/defileo/status/2042241063612502162
+https://x.com/zodchiii/status/2042197541823869178
+https://x.com/om_patel5/status/2041035711063732460
+https://x.com/0x_kaize/status/2038286026284667239
+https://x.com/karpathy/status/2039805659525644595
+https://x.com/zodchiii/status/2040000216456143002
+https://x.com/telonex/status/2022251717270573513
+https://x.com/zodchiii/status/2038909113795584094
+https://x.com/itsolelehmann/status/2038661433626333649
+https://x.com/k1rallik/status/2037868113480319321

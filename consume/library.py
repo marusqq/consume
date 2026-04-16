@@ -79,24 +79,29 @@ def read_library_summary(project_dir: Path, url: str) -> str | None:
     return "\n".join(bullets) if bullets else None
 
 
+def _unique_slug(slug: str, existing_slugs: set[str]) -> str:
+    base, counter = slug, 2
+    while slug in existing_slugs:
+        slug = f"{base}_{counter}"
+        counter += 1
+    return slug
+
+
 def register(project_dir: Path, url: str, summary: str) -> str:
     """Save summary to library and return the slug.
 
     Creates library/{slug}.md if it doesn't exist yet.
     Does NOT overwrite an existing library entry.
+    Uses Claude to generate a descriptive filename.
     """
+    from .summarizer import generate_filename
+
     index = load_index(project_dir)
     if url in index:
         return index[url]["slug"]
 
-    slug = _url_to_slug(url)
-    # Ensure slug is unique within this index
     existing_slugs = {v["slug"] for v in index.values()}
-    base = slug
-    counter = 2
-    while slug in existing_slugs:
-        slug = f"{base}_{counter}"
-        counter += 1
+    slug = _unique_slug(generate_filename(summary), existing_slugs)
 
     lib_path = library_md_path(project_dir, slug)
     lib_path.parent.mkdir(parents=True, exist_ok=True)
@@ -104,11 +109,73 @@ def register(project_dir: Path, url: str, summary: str) -> str:
 
     index[url] = {
         "slug": slug,
+        "named": True,
         "consumed_at": datetime.now(timezone.utc).isoformat(),
         "outputs": {},
     }
     _save_index(project_dir, index)
     return slug
+
+
+def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
+    """Rename library and output files for entries that still use URL-based slugs.
+
+    Returns a list of (url, old_slug, new_slug) for every entry that was renamed.
+    """
+    from .summarizer import generate_filename
+
+    index = load_index(project_dir)
+    renamed = []
+
+    for url, entry in list(index.items()):
+        if entry.get("named"):
+            continue  # already has a descriptive name
+
+        old_slug = entry["slug"]
+
+        # Read existing summary from library file
+        old_lib = library_md_path(project_dir, old_slug)
+        if not old_lib.exists():
+            continue
+
+        lines = old_lib.read_text(encoding="utf-8").splitlines()
+        bullets = [l[2:] for l in lines if l.startswith("- ")]
+        if not bullets:
+            continue
+        summary = "\n".join(f"• {b}" for b in bullets)
+
+        existing_slugs = {v["slug"] for v in index.values()} - {old_slug}
+        new_slug = _unique_slug(generate_filename(summary), existing_slugs)
+
+        if new_slug == old_slug:
+            entry["named"] = True
+            continue
+
+        # Rename library file
+        new_lib = library_md_path(project_dir, new_slug)
+        old_lib.rename(new_lib)
+
+        # Rename each output file and update sources.json
+        new_outputs = {}
+        for fmt, old_path_str in entry.get("outputs", {}).items():
+            old_out = Path(old_path_str)
+            if old_out.exists():
+                new_out = old_out.parent / (new_slug + old_out.suffix)
+                old_out.rename(new_out)
+                _update_sources(new_out, url)
+                # Remove old entry from sources.json
+                _remove_source(old_out)
+                new_outputs[fmt] = str(new_out)
+            else:
+                new_outputs[fmt] = old_path_str  # keep stale path as-is
+
+        entry["slug"] = new_slug
+        entry["named"] = True
+        entry["outputs"] = new_outputs
+        renamed.append((url, old_slug, new_slug))
+
+    _save_index(project_dir, index)
+    return renamed
 
 
 def record_output(project_dir: Path, url: str, fmt: str, path: Path) -> None:
@@ -119,6 +186,22 @@ def record_output(project_dir: Path, url: str, fmt: str, path: Path) -> None:
     index[url].setdefault("outputs", {})[fmt] = str(path)
     _save_index(project_dir, index)
     _update_sources(path, url)
+
+
+def _remove_source(output_file: Path) -> None:
+    """Remove an entry from sources.json when a file is renamed."""
+    sources_path = output_file.parent / "sources.json"
+    if not sources_path.exists():
+        return
+    try:
+        sources = json.loads(sources_path.read_text(encoding="utf-8"))
+        sources.pop(output_file.name, None)
+        sources_path.write_text(
+            json.dumps(dict(sorted(sources.items())), indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
 
 
 def _update_sources(output_file: Path, url: str) -> None:

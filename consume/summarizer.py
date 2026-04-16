@@ -1,4 +1,5 @@
 import os
+import re
 
 import anthropic
 
@@ -79,3 +80,32 @@ def summarize(text: str, mode: str = "default") -> str:
     except anthropic.APIError as e:
         raise RuntimeError(f"LLM API error: {e}") from e
     return message.content[0].text.strip()
+
+
+def generate_filename(summary: str) -> str:
+    """Ask Claude to generate a short descriptive snake_case filename for a summary.
+
+    Returns a sanitized string like 'claude_ultraplan_parallel_agents'.
+    Falls back to 'untitled' on any error.
+    """
+    model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
+    client = anthropic.Anthropic()
+    try:
+        message = client.messages.create(
+            model=model,
+            max_tokens=20,
+            messages=[{
+                "role": "user",
+                "content": (
+                    "Generate a filename (3–5 words, snake_case, no extension) that describes "
+                    "the topic of this summary. Output ONLY the filename, nothing else.\n\n"
+                    + summary[:600]
+                ),
+            }],
+        )
+        raw = message.content[0].text.strip().lower()
+        # Keep only alphanumeric and underscores, collapse runs
+        sanitized = re.sub(r"[^\w]+", "_", raw).strip("_")
+        return sanitized[:80] if sanitized else "untitled"
+    except Exception:
+        return "untitled"
