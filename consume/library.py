@@ -17,8 +17,15 @@ def _output_dir(project_dir: Path, fmt: str) -> Path:
     return project_dir / fmt
 
 
-def library_md_path(project_dir: Path, slug: str) -> Path:
+def library_md_path(project_dir: Path, slug: str, category: str | None = None) -> Path:
+    if category:
+        return _library_dir(project_dir) / category / f"{slug}.md"
     return _library_dir(project_dir) / f"{slug}.md"
+
+
+def _lib_path_from_entry(project_dir: Path, entry: dict) -> Path:
+    """Resolve the library .md path from an index entry (respects category subdir)."""
+    return library_md_path(project_dir, entry["slug"], entry.get("category"))
 
 
 def output_path(project_dir: Path, fmt: str, slug: str) -> Path:
@@ -57,7 +64,7 @@ def has_output(project_dir: Path, url: str, fmt: str) -> bool:
         return False
     if fmt == "text":
         # Text goes to terminal — always "available" if summary exists in library
-        return library_md_path(project_dir, entry["slug"]).exists()
+        return _lib_path_from_entry(project_dir, entry).exists()
     return fmt in entry.get("outputs", {})
 
 
@@ -66,7 +73,7 @@ def read_library_summary(project_dir: Path, url: str) -> str | None:
     entry = get_entry(project_dir, url)
     if not entry:
         return None
-    path = library_md_path(project_dir, entry["slug"])
+    path = _lib_path_from_entry(project_dir, entry)
     if not path.exists():
         return None
     # The library .md file starts with "# url\n\n- bullet\n- bullet\n"
@@ -134,7 +141,7 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
         old_slug = entry["slug"]
 
         # Read existing summary from library file
-        old_lib = library_md_path(project_dir, old_slug)
+        old_lib = _lib_path_from_entry(project_dir, entry)
         if not old_lib.exists():
             continue
 
@@ -151,8 +158,9 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
             entry["named"] = True
             continue
 
-        # Rename library file
-        new_lib = library_md_path(project_dir, new_slug)
+        # Rename library file (keep same category subdir if already set)
+        new_lib = library_md_path(project_dir, new_slug, entry.get("category"))
+        new_lib.parent.mkdir(parents=True, exist_ok=True)
         old_lib.rename(new_lib)
 
         # Rename each output file and update sources.json
@@ -176,6 +184,54 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
 
     _save_index(project_dir, index)
     return renamed
+
+
+def cleanup_library(project_dir: Path) -> list[tuple[str, str, str]]:
+    """Sort library files into category subdirectories using Claude.
+
+    Skips entries that already have a category assigned.
+    Returns a list of (slug, category, new_path_str) for every file moved.
+    """
+    from .summarizer import categorize_entries
+
+    index = load_index(project_dir)
+    uncategorized = []
+
+    for entry in index.values():
+        if entry.get("category"):
+            continue
+        lib_path = _lib_path_from_entry(project_dir, entry)
+        if not lib_path.exists():
+            continue
+        lines = lib_path.read_text(encoding="utf-8").splitlines()
+        first_line = next((l[2:] for l in lines if l.startswith("- ")), entry["slug"])
+        uncategorized.append({"slug": entry["slug"], "first_line": first_line})
+
+    if not uncategorized:
+        return []
+
+    categories = categorize_entries(uncategorized)
+
+    moved = []
+    for url, entry in index.items():
+        slug = entry["slug"]
+        if entry.get("category") or slug not in categories:
+            continue
+        category = categories[slug]
+
+        old_lib = _lib_path_from_entry(project_dir, entry)
+        if not old_lib.exists():
+            continue
+
+        new_lib = library_md_path(project_dir, slug, category)
+        new_lib.parent.mkdir(parents=True, exist_ok=True)
+        old_lib.rename(new_lib)
+
+        entry["category"] = category
+        moved.append((slug, category, str(new_lib)))
+
+    _save_index(project_dir, index)
+    return moved
 
 
 def record_output(project_dir: Path, url: str, fmt: str, path: Path) -> None:

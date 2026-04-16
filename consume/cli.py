@@ -17,6 +17,7 @@ from consume.library import (  # noqa: E402
     read_library_summary,
     record_output,
     register,
+    _lib_path_from_entry,
 )
 from consume.spinner import spinner  # noqa: E402
 from consume.summarizer import DEFAULT_BULLETS, LONG_BULLETS_MAX, LONG_BULLETS_MIN, SHORT_BULLETS, summarize  # noqa: E402
@@ -206,7 +207,8 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
         print(f"\nSource: {url}")
     else:
         print(f"Saved: {path}")
-        lib = library_md_path(project_dir, slug)
+        entry = load_index(project_dir).get(url, {})
+        lib = _lib_path_from_entry(project_dir, entry) if entry else library_md_path(project_dir, slug)
         print(f"Library: {lib}")
     return 0
 
@@ -225,6 +227,19 @@ def main():
         else:
             print("Login cancelled — you must complete the login before pressing Enter.", file=sys.stderr)
             sys.exit(1)
+        return
+
+    if len(sys.argv) > 1 and sys.argv[1] == "library-cleanup":
+        from consume.library import cleanup_library
+        from consume.spinner import spinner
+        with spinner("Categorizing…"):
+            moved = cleanup_library(Path.cwd())
+        if not moved:
+            print("Nothing to organize — all entries already have a category.")
+        else:
+            for slug, category, path in moved:
+                print(f"{slug}  →  {category}/")
+            print(f"\nMoved {len(moved)} file{'s' if len(moved) != 1 else ''} into category subdirectories.")
         return
 
     if len(sys.argv) > 1 and sys.argv[1] == "relabel":

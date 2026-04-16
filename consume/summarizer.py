@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -80,6 +81,53 @@ def summarize(text: str, mode: str = "default") -> str:
     except anthropic.APIError as e:
         raise RuntimeError(f"LLM API error: {e}") from e
     return message.content[0].text.strip()
+
+
+def categorize_entries(entries: list[dict]) -> dict[str, str]:
+    """Ask Claude to assign a category directory to each library entry.
+
+    Each entry must have 'slug' and 'first_line' keys.
+    Returns {slug: category} where category is a short snake_case directory name.
+    Falls back to 'misc' for any entry Claude cannot categorize.
+    """
+    if not entries:
+        return {}
+
+    model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
+    client = anthropic.Anthropic()
+
+    lines = "\n".join(f"- {e['slug']}: {e['first_line']}" for e in entries)
+    prompt = (
+        "You are organizing a reading library. Assign each article slug below to a "
+        "short, lowercase, snake_case directory name (2-3 words max, no numbers). "
+        "Group related topics together. Common categories: ai, crypto, programming, "
+        "business, science, health, politics, misc.\n\n"
+        "Output ONLY valid JSON: an object mapping each slug to its category string. "
+        "No explanation, no markdown fences.\n\n"
+        f"Articles:\n{lines}"
+    )
+
+    try:
+        message = client.messages.create(
+            model=model,
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = message.content[0].text.strip()
+        # Strip accidental markdown fences
+        raw = re.sub(r"^```[^\n]*\n?", "", raw)
+        raw = re.sub(r"\n?```$", "", raw)
+        result = json.loads(raw)
+        if isinstance(result, dict):
+            # Sanitize values: keep only alphanumeric and underscores
+            return {
+                slug: re.sub(r"[^\w]+", "_", str(cat)).strip("_").lower() or "misc"
+                for slug, cat in result.items()
+            }
+    except Exception:
+        pass
+
+    return {e["slug"]: "misc" for e in entries}
 
 
 def generate_filename(summary: str) -> str:
