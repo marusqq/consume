@@ -37,7 +37,7 @@ class TestFetchHtml:
 
     def test_raises_for_http_error_status(self, requests_mock):
         requests_mock.get("https://example.com", status_code=404)
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(ConnectionError, match="404"):
             fetch_html("https://example.com")
 
     def test_uses_10_second_timeout(self, requests_mock):

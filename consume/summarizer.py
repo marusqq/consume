@@ -1,10 +1,20 @@
 import json
 import os
 import re
+import sys
 
 import anthropic
 
 from .utils import truncate_text
+
+_client: anthropic.Anthropic | None = None
+
+
+def _get_client() -> anthropic.Anthropic:
+    global _client
+    if _client is None:
+        _client = anthropic.Anthropic()
+    return _client
 
 SHORT_BULLETS = 3
 DEFAULT_BULLETS = 5
@@ -64,7 +74,7 @@ def summarize(text: str, mode: str = "default") -> str:
         max_tokens = 512
 
     model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
-    client = anthropic.Anthropic()
+    client = _get_client()
     try:
         message = client.messages.create(
             model=model,
@@ -94,7 +104,7 @@ def categorize_entries(entries: list[dict]) -> dict[str, dict[str, str]]:
         return {}
 
     model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
-    client = anthropic.Anthropic()
+    client = _get_client()
 
     lines = "\n".join(f"- {e['slug']}: {e['first_line']}" for e in entries)
     prompt = (
@@ -120,40 +130,52 @@ def categorize_entries(entries: list[dict]) -> dict[str, dict[str, str]]:
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = message.content[0].text.strip()
-        # Strip markdown fences if present
-        raw = re.sub(r"^```[^\n]*\n?", "", raw)
-        raw = re.sub(r"\n?```$", "", raw.rstrip())
+    except anthropic.APIError as exc:
+        print(f"Warning: categorization API call failed ({exc}); falling back to misc/general.", file=sys.stderr)
+        return {e["slug"]: {"category": "misc", "subcategory": "general"} for e in entries}
+
+    raw = message.content[0].text.strip()
+    # Strip markdown fences if present
+    raw = re.sub(r"^```[^\n]*\n?", "", raw)
+    raw = re.sub(r"\n?```$", "", raw.rstrip())
+
+    try:
         result = json.loads(raw)
+    except json.JSONDecodeError:
+        print(
+            f"Warning: categorization returned unparseable JSON; falling back to misc/general.\n"
+            f"  Raw response: {raw[:200]!r}",
+            file=sys.stderr,
+        )
+        return {e["slug"]: {"category": "misc", "subcategory": "general"} for e in entries}
 
-        out: dict[str, dict[str, str]] = {}
+    out: dict[str, dict[str, str]] = {}
 
-        if isinstance(result, list):
-            # Array format: [{"slug": "...", "category": "...", "subcategory": "..."}]
-            for item in result:
-                if isinstance(item, dict) and "slug" in item:
-                    slug = str(item["slug"])
-                    out[slug] = {
-                        "category": _sanitize(item.get("category", "misc")),
-                        "subcategory": _sanitize(item.get("subcategory", "general")),
-                    }
-        elif isinstance(result, dict):
-            # Object format: {"slug": {"category": "...", "subcategory": "..."}}
-            for slug, val in result.items():
-                if isinstance(val, dict):
-                    out[slug] = {
-                        "category": _sanitize(val.get("category", "misc")),
-                        "subcategory": _sanitize(val.get("subcategory", "general")),
-                    }
-                else:
-                    out[slug] = {"category": _sanitize(val), "subcategory": "general"}
+    if isinstance(result, list):
+        # Array format: [{"slug": "...", "category": "...", "subcategory": "..."}]
+        for item in result:
+            if isinstance(item, dict) and "slug" in item:
+                slug = str(item["slug"])
+                out[slug] = {
+                    "category": _sanitize(item.get("category", "misc")),
+                    "subcategory": _sanitize(item.get("subcategory", "general")),
+                }
+    elif isinstance(result, dict):
+        # Object format: {"slug": {"category": "...", "subcategory": "..."}}
+        for slug, val in result.items():
+            if isinstance(val, dict):
+                out[slug] = {
+                    "category": _sanitize(val.get("category", "misc")),
+                    "subcategory": _sanitize(val.get("subcategory", "general")),
+                }
+            else:
+                out[slug] = {"category": _sanitize(val), "subcategory": "general"}
 
-        if out:
-            return out
-    except Exception:
-        pass
+    if not out:
+        print("Warning: categorization returned an empty result; falling back to misc/general.", file=sys.stderr)
+        return {e["slug"]: {"category": "misc", "subcategory": "general"} for e in entries}
 
-    return {e["slug"]: {"category": "misc", "subcategory": "general"} for e in entries}
+    return out
 
 
 def generate_filename(summary: str) -> str:
@@ -163,7 +185,7 @@ def generate_filename(summary: str) -> str:
     Falls back to 'untitled' on any error.
     """
     model = os.environ.get("CONSUME_MODEL", DEFAULT_MODEL)
-    client = anthropic.Anthropic()
+    client = _get_client()
     try:
         message = client.messages.create(
             model=model,

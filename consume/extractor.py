@@ -136,8 +136,8 @@ def _fetch_x_html(url: str) -> str:
         raise ConnectionError(f"Could not connect to '{url}'. Check your network connection.")
     except requests.exceptions.HTTPError as e:
         raise ConnectionError(f"Could not fetch X content (HTTP {e.response.status_code}): '{url}'")
-    except Exception:
-        pass
+    except requests.exceptions.RequestException:
+        pass  # other network hiccups: fall through to bot-UA fallback
 
     # If the tweet body is just a t.co link, it's likely an X Article — follow it
     # and try the browser on the resolved URL (e.g. x.com/i/article/...)
@@ -176,6 +176,10 @@ def fetch_html(url: str) -> str:
         raise TimeoutError(f"Request timed out after {TIMEOUT}s: '{url}'")
     except requests.exceptions.ConnectionError:
         raise ConnectionError(f"Could not connect to '{url}'. Check your network connection.")
+    except requests.exceptions.HTTPError as e:
+        raise ConnectionError(f"HTTP {e.response.status_code} fetching '{url}'") from e
+    except requests.exceptions.RequestException as e:
+        raise ConnectionError(f"Request failed for '{url}': {e}") from e
     return response.text
 
 

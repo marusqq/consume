@@ -10,7 +10,6 @@ load_dotenv()
 
 from consume.extractor import extract_content, fetch_html  # noqa: E402
 from consume.library import (  # noqa: E402
-    has_output,
     library_md_path,
     load_index,
     output_path,
@@ -131,26 +130,28 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
     """Fetch, extract, summarize, and render a single URL. Returns exit code."""
     project_dir = Path.cwd()
 
+    # Load index once; reuse it for all cache checks and lookups below.
+    index = load_index(project_dir)
+    entry = index.get(url, {})
+
     # --- Cache hit: output type already generated ---
-    if has_output(project_dir, url, fmt) and not out:
-        if fmt == "text":
-            # Re-print from library without re-fetching
-            summary = read_library_summary(project_dir, url)
-            if summary:
-                print(format_bullets(summary))
-                print(f"\nSource: {url}")
-                return 0
-        else:
-            entry = load_index(project_dir).get(url, {})
-            existing = entry.get("outputs", {}).get(fmt)
-            if existing:
-                print(f"Already consumed. {fmt.capitalize()} at: {existing}")
-                return 0
+    if not out:
+        if fmt == "text" and entry:
+            lib_path = _lib_path_from_entry(project_dir, entry)
+            if lib_path.exists():
+                summary = read_library_summary(project_dir, url)
+                if summary:
+                    print(format_bullets(summary))
+                    print(f"\nSource: {url}")
+                    return 0
+        elif fmt != "text" and fmt in entry.get("outputs", {}):
+            existing = entry["outputs"][fmt]
+            print(f"Already consumed. {fmt.capitalize()} at: {existing}")
+            return 0
 
     # --- Cache hit: summary exists but this output type is new ---
     cached_summary = read_library_summary(project_dir, url)
     if cached_summary and fmt != "text":
-        entry = load_index(project_dir).get(url, {})
         slug = entry["slug"]
         path = Path(out) if out else output_path(project_dir, fmt, slug)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -190,7 +191,7 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
             return 1
 
         step("Saving…")
-        slug = register(project_dir, url, summary)
+        slug = register(project_dir, url, summary, _index=index)
 
         if fmt == "text":
             pass  # library already written; print below
@@ -207,8 +208,9 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
         print(f"\nSource: {url}")
     else:
         print(f"Saved: {path}")
-        entry = load_index(project_dir).get(url, {})
-        lib = _lib_path_from_entry(project_dir, entry) if entry else library_md_path(project_dir, slug)
+        # Re-read entry after register wrote it so we get the correct library path.
+        fresh_entry = load_index(project_dir).get(url, {})
+        lib = _lib_path_from_entry(project_dir, fresh_entry) if fresh_entry else library_md_path(project_dir, slug)
         print(f"Library: {lib}")
     return 0
 

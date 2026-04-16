@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import anthropic
 import pytest
 
+import consume.summarizer
 from consume.summarizer import (
     DEFAULT_BULLETS,
     DEFAULT_MODEL,
@@ -11,6 +12,14 @@ from consume.summarizer import (
     SHORT_BULLETS,
     summarize,
 )
+
+
+@pytest.fixture(autouse=True)
+def reset_client():
+    """Reset the module-level singleton before each test so patches take effect."""
+    consume.summarizer._client = None
+    yield
+    consume.summarizer._client = None
 
 
 def _make_client(response_text: str) -> MagicMock:

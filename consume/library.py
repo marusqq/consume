@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .renderer import _url_to_slug, to_markdown
+from .renderer import to_markdown
 
 _INDEX_FILE = ".index.json"
 
@@ -107,16 +107,18 @@ def _unique_slug(slug: str, existing_slugs: set[str]) -> str:
     return slug
 
 
-def register(project_dir: Path, url: str, summary: str) -> str:
+def register(project_dir: Path, url: str, summary: str, _index: dict | None = None) -> str:
     """Save summary to library and return the slug.
 
     Creates library/{slug}.md if it doesn't exist yet.
     Does NOT overwrite an existing library entry.
     Uses Claude to generate a descriptive filename.
+
+    Pass _index to reuse an already-loaded index (avoids redundant disk reads).
     """
     from .summarizer import generate_filename
 
-    index = load_index(project_dir)
+    index = _index if _index is not None else load_index(project_dir)
     if url in index:
         return index[url]["slug"]
 
@@ -159,7 +161,7 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
             continue
 
         lines = old_lib.read_text(encoding="utf-8").splitlines()
-        bullets = [l[2:] for l in lines if l.startswith("- ")]
+        bullets = [line[2:] for line in lines if line.startswith("- ")]
         if not bullets:
             continue
         summary = "\n".join(f"• {b}" for b in bullets)
@@ -174,6 +176,9 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
         # Rename library file (keep same category subdir if already set)
         new_lib = library_md_path(project_dir, new_slug, entry.get("category"))
         new_lib.parent.mkdir(parents=True, exist_ok=True)
+        if new_lib.exists():
+            print(f"  Warning: {new_lib.name} already exists, skipping rename of {old_slug}", flush=True)
+            continue
         old_lib.rename(new_lib)
 
         # Rename each output file and update sources.json
@@ -182,11 +187,13 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
             old_out = Path(old_path_str)
             if old_out.exists():
                 new_out = old_out.parent / (new_slug + old_out.suffix)
-                old_out.rename(new_out)
-                _update_sources(new_out, url)
-                # Remove old entry from sources.json
-                _remove_source(old_out)
-                new_outputs[fmt] = str(new_out)
+                if not new_out.exists():
+                    old_out.rename(new_out)
+                    _update_sources(new_out, url)
+                    _remove_source(old_out)
+                    new_outputs[fmt] = str(new_out)
+                else:
+                    new_outputs[fmt] = old_path_str  # destination exists, keep old path
             else:
                 new_outputs[fmt] = old_path_str  # keep stale path as-is
 
@@ -217,13 +224,16 @@ def cleanup_library(project_dir: Path) -> list[tuple[str, str, str, str]]:
         if not lib_path.exists():
             continue
         lines = lib_path.read_text(encoding="utf-8").splitlines()
-        first_line = next((l[2:] for l in lines if l.startswith("- ")), entry["slug"])
+        first_line = next((ln[2:] for ln in lines if ln.startswith("- ")), entry["slug"])
         needs_work.append({"slug": entry["slug"], "first_line": first_line})
 
     if not needs_work:
         return []
 
     assignments = categorize_entries(needs_work)
+    if not assignments:
+        print("Warning: categorization returned no results; index unchanged.", flush=True)
+        return []
 
     moved = []
     for url, entry in index.items():
@@ -245,8 +255,16 @@ def cleanup_library(project_dir: Path) -> list[tuple[str, str, str, str]]:
             entry["subcategory"] = subcategory
             continue
 
+        if new_lib.exists():
+            print(f"  Warning: destination {new_lib} already exists, skipping {slug}", flush=True)
+            continue
+
         new_lib.parent.mkdir(parents=True, exist_ok=True)
-        old_lib.rename(new_lib)
+        try:
+            old_lib.rename(new_lib)
+        except OSError as exc:
+            print(f"  Warning: could not move {slug}: {exc}", flush=True)
+            continue
 
         # Remove stale empty parent dirs left behind (best-effort)
         try:

@@ -1,6 +1,7 @@
 """Markdown and PDF rendering for consume summaries."""
 
 import re
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -87,7 +88,12 @@ def write_pdf(path: Path, url: str, summary: str) -> None:
         pdf.add_font("Unicode", style="B", fname=font_path)
         body_font = "Unicode"
     else:
-        # Latin-1 fallback: strip characters outside latin-1 range
+        # Latin-1 fallback: bullet points and non-Latin characters will be corrupted.
+        print(
+            "Warning: no Unicode font found; PDF output may contain garbled characters.\n"
+            "  Install Arial Unicode or DejaVu Sans to fix this.",
+            file=sys.stderr,
+        )
         body_font = "Helvetica"
 
     def safe(text: str) -> str:

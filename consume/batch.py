@@ -62,12 +62,12 @@ def run_batch(
     total = len(urls)
     print(f"Batch: {total} URL{'s' if total != 1 else ''} from {file}\n")
 
-    exit_code = 0
+    failed: list[str] = []
     for i, url in enumerate(urls, start=1):
         print(f"[{i}/{total}] {url}")
         rc = _process_url(url, mode, fmt, None, voice)
         if rc != 0:
-            exit_code = 1
+            failed.append(url)
 
         if i == total:
             break
@@ -83,5 +83,12 @@ def run_batch(
 
         print()
 
-    print(f"\nDone. {total} URL{'s' if total != 1 else ''} processed.")
-    return exit_code
+    succeeded = total - len(failed)
+    print(f"\nDone. {succeeded}/{total} succeeded.", end="")
+    if failed:
+        print(f"  {len(failed)} failed:")
+        for url in failed:
+            print(f"  - {url}")
+    else:
+        print()
+    return 1 if failed else 0
