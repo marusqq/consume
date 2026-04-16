@@ -112,9 +112,28 @@ def register(project_dir: Path, url: str, summary: str) -> str:
 
 
 def record_output(project_dir: Path, url: str, fmt: str, path: Path) -> None:
-    """Mark a non-text output as generated in the index."""
+    """Mark a non-text output as generated in the index and update sources.json."""
     index = load_index(project_dir)
     if url not in index:
         return
     index[url].setdefault("outputs", {})[fmt] = str(path)
     _save_index(project_dir, index)
+    _update_sources(path, url)
+
+
+def _update_sources(output_file: Path, url: str) -> None:
+    """Add or update an entry in sources.json next to the output file.
+
+    sources.json lives in the same directory as the output and maps
+    filename → source URL for easy lookup without touching the library index.
+    """
+    sources_path = output_file.parent / "sources.json"
+    try:
+        sources = json.loads(sources_path.read_text(encoding="utf-8")) if sources_path.exists() else {}
+    except Exception:
+        sources = {}
+    sources[output_file.name] = url
+    sources_path.write_text(
+        json.dumps(dict(sorted(sources.items())), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )

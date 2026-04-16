@@ -215,4 +215,5 @@ markdown/
 pdf/
 *.mp3
 *.pdf
+sources.json
 .DS_Store

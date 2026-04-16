@@ -137,6 +137,7 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
             summary = read_library_summary(project_dir, url)
             if summary:
                 print(format_bullets(summary))
+                print(f"\nSource: {url}")
                 return 0
         else:
             entry = load_index(project_dir).get(url, {})
@@ -202,6 +203,7 @@ def _process_url(url: str, mode: str, fmt: str, out: str | None, voice: str | No
 
     if fmt == "text":
         print(format_bullets(summary))
+        print(f"\nSource: {url}")
     else:
         print(f"Saved: {path}")
         lib = library_md_path(project_dir, slug)
