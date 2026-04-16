@@ -106,7 +106,8 @@ class TestFetchXHtmlOembedFallback:
 class TestFetchXHtmlBrowser:
     """Tests for the headless-browser primary path."""
 
-    _BROWSER_TEXT = "This is the full article rendered by the browser."
+    # Long enough (>= 100 chars) to trigger the early-return path
+    _BROWSER_TEXT = "This is the full article rendered by the browser. " * 3
 
     @pytest.fixture(autouse=True)
     def with_browser(self):
@@ -115,12 +116,12 @@ class TestFetchXHtmlBrowser:
 
     def test_browser_text_used_when_available(self):
         result = fetch_html("https://x.com/nick/status/456")
-        assert self._BROWSER_TEXT in result
+        assert "This is the full article rendered by the browser." in result
 
     def test_oembed_not_called_when_browser_succeeds(self, requests_mock):
         requests_mock.get(_X_OEMBED_URL, json={})
         fetch_html("https://x.com/nick/status/456")
-        # No HTTP request to oEmbed should have been made
+        # No HTTP request to oEmbed should have been made (browser result is long enough)
         assert not any(_X_OEMBED_URL in r.url for r in requests_mock.request_history)
 
     def test_returns_html_string(self):

@@ -10,7 +10,7 @@ from .utils import normalize_whitespace
 
 TIMEOUT = 10
 USER_AGENT = "consume/1.0 (content reader)"
-MIN_CONTENT_LENGTH = 50
+MIN_CONTENT_LENGTH = 20
 
 _X_DOMAINS = {"x.com", "twitter.com", "www.x.com", "www.twitter.com"}
 _X_OEMBED_URL = "https://publish.twitter.com/oembed"
@@ -109,12 +109,16 @@ def _fetch_x_html(url: str) -> str:
     # --- Primary: headless browser on the status URL ---
     browser_text = fetch_x_text(clean_url)
 
-    if browser_text:
+    # Only return early if the browser got a meaningfully long result; otherwise
+    # keep trying fallbacks and pick the longest candidate at the end.
+    if browser_text and len(browser_text) >= 100:
         title = html.escape("X Post")
         body = html.escape(browser_text)
         return f"<html><body><article><h1>{title}</h1><p>{body}</p></article></body></html>"
 
     # --- oEmbed to get author + tweet text ---
+    author = ""
+    oembed_text = ""
     try:
         response = requests.get(
             _X_OEMBED_URL,
@@ -123,30 +127,34 @@ def _fetch_x_html(url: str) -> str:
             headers={"User-Agent": USER_AGENT},
         )
         response.raise_for_status()
+        data = response.json()
+        author = data.get("author_name", "")
+        oembed_text = _extract_tweet_text(data.get("html", ""))
     except requests.exceptions.Timeout:
         raise TimeoutError(f"Request timed out after {TIMEOUT}s: '{url}'")
     except requests.exceptions.ConnectionError:
         raise ConnectionError(f"Could not connect to '{url}'. Check your network connection.")
     except requests.exceptions.HTTPError as e:
         raise ConnectionError(f"Could not fetch X content (HTTP {e.response.status_code}): '{url}'")
-
-    data = response.json()
-    author = data.get("author_name", "")
-    oembed_text = _extract_tweet_text(data.get("html", ""))
+    except Exception:
+        pass
 
     # If the tweet body is just a t.co link, it's likely an X Article — follow it
     # and try the browser on the resolved URL (e.g. x.com/i/article/...)
     if _TCO_ONLY_RE.match(oembed_text):
         article_url = _resolve_tco(oembed_text)
-        browser_text = fetch_x_text(article_url)
-        if browser_text:
+        article_browser_text = fetch_x_text(article_url)
+        if article_browser_text:
             title = html.escape(f"Article by {author}" if author else "X Article")
-            body = html.escape(browser_text)
+            body = html.escape(article_browser_text)
             return f"<html><body><article><h1>{title}</h1><p>{body}</p></article></body></html>"
 
     # Last-resort: try bot-UA og:description fetch
     article_text = _try_fetch_x_article_text(clean_url)
-    content = article_text if len(article_text) > len(oembed_text) * 2 else oembed_text
+
+    # Pick the longest candidate across all strategies
+    candidates = [c for c in [browser_text, oembed_text, article_text] if c]
+    content = max(candidates, key=len) if candidates else ""
 
     title = html.escape(f"Post by {author}" if author else "X Post")
     body = html.escape(content)
