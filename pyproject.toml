@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=61.0"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "consume"
@@ -10,10 +10,21 @@ dependencies = [
     "requests",
     "readability-lxml",
     "anthropic",
+    "python-dotenv",
+    "selenium",
+    "undetected-chromedriver",
+    "fpdf2",
+    "edge-tts",
 ]
 
 [project.scripts]
 consume = "consume.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "requests-mock",
+]
 
 [tool.pytest.ini_options]
 markers = [

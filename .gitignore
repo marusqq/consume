@@ -207,3 +207,12 @@ marimo/_lsp/
 __marimo__/
 .ralphster/
 .idea/
+
+# consume — generated output
+library/
+audio/
+markdown/
+pdf/
+*.mp3
+*.pdf
+.DS_Store
