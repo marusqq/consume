@@ -7,6 +7,12 @@ import pytest
 from consume.cli import format_bullets, main, parse_args
 
 
+@pytest.fixture(autouse=True)
+def _tmp_project_dir(tmp_path, monkeypatch):
+    """Redirect all library writes to a temp directory so tests don't pollute CWD."""
+    monkeypatch.chdir(tmp_path)
+
+
 class TestParseArgs:
     def test_url_is_required(self):
         with pytest.raises(SystemExit):

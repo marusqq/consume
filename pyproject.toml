@@ -11,6 +11,10 @@ dependencies = [
     "readability-lxml",
     "anthropic",
     "python-dotenv",
+    "selenium",
+    "undetected-chromedriver",
+    "fpdf2",
+    "edge-tts",
 ]
 
 [project.scripts]
