@@ -83,12 +83,12 @@ def summarize(text: str, mode: str = "default") -> str:
     return message.content[0].text.strip()
 
 
-def categorize_entries(entries: list[dict]) -> dict[str, str]:
-    """Ask Claude to assign a category directory to each library entry.
+def categorize_entries(entries: list[dict]) -> dict[str, dict[str, str]]:
+    """Ask Claude to assign a two-level category to each library entry.
 
     Each entry must have 'slug' and 'first_line' keys.
-    Returns {slug: category} where category is a short snake_case directory name.
-    Falls back to 'misc' for any entry Claude cannot categorize.
+    Returns {slug: {"category": "ai", "subcategory": "agents"}}.
+    Falls back to {"category": "misc", "subcategory": "general"} on any error.
     """
     if not entries:
         return {}
@@ -98,14 +98,21 @@ def categorize_entries(entries: list[dict]) -> dict[str, str]:
 
     lines = "\n".join(f"- {e['slug']}: {e['first_line']}" for e in entries)
     prompt = (
-        "You are organizing a reading library. Assign each article slug below to a "
-        "short, lowercase, snake_case directory name (2-3 words max, no numbers). "
-        "Group related topics together. Common categories: ai, crypto, programming, "
-        "business, science, health, politics, misc.\n\n"
-        "Output ONLY valid JSON: an object mapping each slug to its category string. "
-        "No explanation, no markdown fences.\n\n"
+        "You are organizing a reading library into a two-level folder hierarchy.\n"
+        "For each article slug assign:\n"
+        "  - category: broad topic (e.g. ai, crypto, programming, business, science, politics, misc)\n"
+        "  - subcategory: specific sub-topic within that category (e.g. agents, tools, trading, "
+        "web_dev, economics, regulation)\n\n"
+        "Rules:\n"
+        "1. Both values must be lowercase snake_case, 1-3 words, no numbers.\n"
+        "2. subcategory must make sense inside its category.\n"
+        "3. Output ONLY valid JSON — an object where each key is a slug and each value is "
+        "{\"category\": \"...\", \"subcategory\": \"...\"}. No explanation, no markdown fences.\n\n"
         f"Articles:\n{lines}"
     )
+
+    def _sanitize(s: str) -> str:
+        return re.sub(r"[^\w]+", "_", str(s)).strip("_").lower() or "misc"
 
     try:
         message = client.messages.create(
@@ -114,20 +121,39 @@ def categorize_entries(entries: list[dict]) -> dict[str, str]:
             messages=[{"role": "user", "content": prompt}],
         )
         raw = message.content[0].text.strip()
-        # Strip accidental markdown fences
+        # Strip markdown fences if present
         raw = re.sub(r"^```[^\n]*\n?", "", raw)
-        raw = re.sub(r"\n?```$", "", raw)
+        raw = re.sub(r"\n?```$", "", raw.rstrip())
         result = json.loads(raw)
-        if isinstance(result, dict):
-            # Sanitize values: keep only alphanumeric and underscores
-            return {
-                slug: re.sub(r"[^\w]+", "_", str(cat)).strip("_").lower() or "misc"
-                for slug, cat in result.items()
-            }
+
+        out: dict[str, dict[str, str]] = {}
+
+        if isinstance(result, list):
+            # Array format: [{"slug": "...", "category": "...", "subcategory": "..."}]
+            for item in result:
+                if isinstance(item, dict) and "slug" in item:
+                    slug = str(item["slug"])
+                    out[slug] = {
+                        "category": _sanitize(item.get("category", "misc")),
+                        "subcategory": _sanitize(item.get("subcategory", "general")),
+                    }
+        elif isinstance(result, dict):
+            # Object format: {"slug": {"category": "...", "subcategory": "..."}}
+            for slug, val in result.items():
+                if isinstance(val, dict):
+                    out[slug] = {
+                        "category": _sanitize(val.get("category", "misc")),
+                        "subcategory": _sanitize(val.get("subcategory", "general")),
+                    }
+                else:
+                    out[slug] = {"category": _sanitize(val), "subcategory": "general"}
+
+        if out:
+            return out
     except Exception:
         pass
 
-    return {e["slug"]: "misc" for e in entries}
+    return {e["slug"]: {"category": "misc", "subcategory": "general"} for e in entries}
 
 
 def generate_filename(summary: str) -> str:

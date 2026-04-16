@@ -17,15 +17,28 @@ def _output_dir(project_dir: Path, fmt: str) -> Path:
     return project_dir / fmt
 
 
-def library_md_path(project_dir: Path, slug: str, category: str | None = None) -> Path:
+def library_md_path(
+    project_dir: Path,
+    slug: str,
+    category: str | None = None,
+    subcategory: str | None = None,
+) -> Path:
+    base = _library_dir(project_dir)
+    if category and subcategory:
+        return base / category / subcategory / f"{slug}.md"
     if category:
-        return _library_dir(project_dir) / category / f"{slug}.md"
-    return _library_dir(project_dir) / f"{slug}.md"
+        return base / category / f"{slug}.md"
+    return base / f"{slug}.md"
 
 
 def _lib_path_from_entry(project_dir: Path, entry: dict) -> Path:
-    """Resolve the library .md path from an index entry (respects category subdir)."""
-    return library_md_path(project_dir, entry["slug"], entry.get("category"))
+    """Resolve the library .md path from an index entry (respects category/subcategory)."""
+    return library_md_path(
+        project_dir,
+        entry["slug"],
+        entry.get("category"),
+        entry.get("subcategory"),
+    )
 
 
 def output_path(project_dir: Path, fmt: str, slug: str) -> Path:
@@ -186,49 +199,64 @@ def relabel(project_dir: Path) -> list[tuple[str, str, str]]:
     return renamed
 
 
-def cleanup_library(project_dir: Path) -> list[tuple[str, str, str]]:
-    """Sort library files into category subdirectories using Claude.
+def cleanup_library(project_dir: Path) -> list[tuple[str, str, str, str]]:
+    """Sort library files into two-level category subdirectories using Claude.
 
-    Skips entries that already have a category assigned.
-    Returns a list of (slug, category, new_path_str) for every file moved.
+    Processes entries that are missing a category, missing a subcategory, or both.
+    Returns a list of (slug, category, subcategory, new_path_str) for every file moved.
     """
     from .summarizer import categorize_entries
 
     index = load_index(project_dir)
-    uncategorized = []
+    needs_work = []
 
     for entry in index.values():
-        if entry.get("category"):
+        if entry.get("category") and entry.get("subcategory"):
             continue
         lib_path = _lib_path_from_entry(project_dir, entry)
         if not lib_path.exists():
             continue
         lines = lib_path.read_text(encoding="utf-8").splitlines()
         first_line = next((l[2:] for l in lines if l.startswith("- ")), entry["slug"])
-        uncategorized.append({"slug": entry["slug"], "first_line": first_line})
+        needs_work.append({"slug": entry["slug"], "first_line": first_line})
 
-    if not uncategorized:
+    if not needs_work:
         return []
 
-    categories = categorize_entries(uncategorized)
+    assignments = categorize_entries(needs_work)
 
     moved = []
     for url, entry in index.items():
         slug = entry["slug"]
-        if entry.get("category") or slug not in categories:
+        if (entry.get("category") and entry.get("subcategory")) or slug not in assignments:
             continue
-        category = categories[slug]
+
+        assigned = assignments[slug]
+        category = assigned["category"]
+        subcategory = assigned["subcategory"]
 
         old_lib = _lib_path_from_entry(project_dir, entry)
         if not old_lib.exists():
             continue
 
-        new_lib = library_md_path(project_dir, slug, category)
+        new_lib = library_md_path(project_dir, slug, category, subcategory)
+        if new_lib == old_lib:
+            entry["category"] = category
+            entry["subcategory"] = subcategory
+            continue
+
         new_lib.parent.mkdir(parents=True, exist_ok=True)
         old_lib.rename(new_lib)
 
+        # Remove stale empty parent dirs left behind (best-effort)
+        try:
+            old_lib.parent.rmdir()
+        except OSError:
+            pass
+
         entry["category"] = category
-        moved.append((slug, category, str(new_lib)))
+        entry["subcategory"] = subcategory
+        moved.append((slug, category, subcategory, str(new_lib)))
 
     _save_index(project_dir, index)
     return moved

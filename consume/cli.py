@@ -235,10 +235,10 @@ def main():
         with spinner("Categorizing…"):
             moved = cleanup_library(Path.cwd())
         if not moved:
-            print("Nothing to organize — all entries already have a category.")
+            print("Nothing to organize — all entries already have a category and subcategory.")
         else:
-            for slug, category, path in moved:
-                print(f"{slug}  →  {category}/")
+            for slug, category, subcategory, path in moved:
+                print(f"{slug}  →  {category}/{subcategory}/")
             print(f"\nMoved {len(moved)} file{'s' if len(moved) != 1 else ''} into category subdirectories.")
         return
 
